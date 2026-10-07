@@ -24,30 +24,21 @@ const PRODUCTS = [
 ];
 
 /* ================================
-   GLOBAL SETTINGS
+   SETTINGS
 ================================ */
 
 const WHATSAPP_NUMBER = "";
-
-/*
-  IMPORTANT:
-  The actual logo is stored in:
-  src/aop-logo.png
-
-  The Worker serves it through:
-  /aop-logo.png
-*/
 
 const LOGO_SOURCE =
   "https://raw.githubusercontent.com/avinashbaraiya1113-lang/Alang-original-product-catalog/main/src/aop-logo.png";
 
 
 /* ================================
-   HTML ESCAPE
+   HELPERS
 ================================ */
 
-function escapeHtml(value = "") {
-  return String(value)
+function escapeHtml(value) {
+  return String(value || "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -57,21 +48,14 @@ function escapeHtml(value = "") {
 
 
 /* ================================
-   PRODUCT DATA
-================================ */
-
-function getProducts() {
-  return PRODUCTS;
-}
-
-
-/* ================================
-   MAIN HTML
+   WEBSITE HTML
 ================================ */
 
 function renderPage() {
-  return `<!DOCTYPE html>
+  return `
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
@@ -79,16 +63,20 @@ function renderPage() {
 <meta
   name="viewport"
   content="width=device-width, initial-scale=1.0"
-/>
+>
 
 <meta
   name="description"
   content="ALANG ORIGINAL PRODUCTS - Original industrial products from Alang, Gujarat."
-/>
+>
 
 <title>ALANG ORIGINAL PRODUCTS | AOP</title>
 
 <style>
+
+/* ================================
+   RESET
+================================ */
 
 * {
   box-sizing: border-box;
@@ -98,50 +86,51 @@ function renderPage() {
 
 :root {
   --bg: #05070a;
-  --panel: #0c1015;
+  --panel: #0d1218;
   --panel2: #111820;
-  --metal: #c5cbd1;
-  --muted: #8d98a3;
   --white: #f5f7f9;
+  --muted: #909aa4;
   --red: #ff2020;
-  --red-dark: #a40000;
-  --border: rgba(255,255,255,.12);
-  --glow: rgba(255,20,20,.30);
+  --red2: #b40000;
+  --green: #20c767;
+  --border: rgba(255,255,255,.11);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background:
-    radial-gradient(
-      circle at 50% -10%,
-      rgba(255,30,30,.14),
-      transparent 38%
-    ),
-    linear-gradient(
-      180deg,
-      #030507 0%,
-      #070a0e 45%,
-      #030507 100%
-    );
+  min-height: 100vh;
+  overflow-x: hidden;
 
   color: var(--white);
+
   font-family:
-    Inter,
     Arial,
     Helvetica,
     sans-serif;
 
-  min-height: 100vh;
-  overflow-x: hidden;
+  background:
+    radial-gradient(
+      circle at 50% -10%,
+      rgba(255,20,20,.15),
+      transparent 38%
+    ),
+    linear-gradient(
+      180deg,
+      #030507,
+      #080b0f 45%,
+      #030507
+    );
 }
-
-/* ================================
-   INDUSTRIAL BACKGROUND
-================================ */
 
 body::before {
   content: "";
+
   position: fixed;
   inset: 0;
+
   pointer-events: none;
 
   background-image:
@@ -157,13 +146,6 @@ body::before {
 
   background-size: 42px 42px;
 
-  mask-image:
-    linear-gradient(
-      to bottom,
-      black,
-      transparent 85%
-    );
-
   z-index: -1;
 }
 
@@ -175,14 +157,12 @@ body::before {
 header {
   position: relative;
 
-  width: 100%;
+  text-align: center;
 
   padding:
-    34px
-    20px
-    28px;
-
-  text-align: center;
+    28px
+    16px
+    25px;
 
   border-bottom:
     1px solid
@@ -191,18 +171,18 @@ header {
   background:
     linear-gradient(
       180deg,
-      rgba(10,13,17,.97),
-      rgba(5,7,10,.92)
+      rgba(12,15,20,.98),
+      rgba(5,7,10,.94)
     );
 
   box-shadow:
-    0 12px 40px
+    0 15px 45px
     rgba(0,0,0,.45);
 }
 
 
 /* ================================
-   LOGO
+   REAL AOP LOGO
 ================================ */
 
 .logo-wrap {
@@ -211,16 +191,14 @@ header {
   justify-content: center;
   align-items: center;
 
-  margin-bottom: 22px;
+  margin-bottom: 18px;
 }
 
 .main-logo {
   display: block;
 
-  width: min(
-    430px,
-    82vw
-  );
+  width:
+    min(430px, 86vw);
 
   max-height: 230px;
 
@@ -228,53 +206,45 @@ header {
 
   filter:
     drop-shadow(
-      0 0 18px
-      rgba(255,20,20,.20)
+      0 0 20px
+      rgba(255,20,20,.25)
     );
 
   transition:
-    transform .35s ease,
-    filter .35s ease;
+    transform .3s ease,
+    filter .3s ease;
 }
 
 .main-logo:hover {
-  transform: scale(1.025);
+  transform: scale(1.03);
 
   filter:
     drop-shadow(
-      0 0 30px
-      rgba(255,20,20,.35)
+      0 0 32px
+      rgba(255,20,20,.40)
     );
 }
 
 
 /* ================================
-   BRAND NAME
+   BRAND
 ================================ */
 
 .brand-name {
-  font-size: clamp(
-    25px,
-    5vw,
-    48px
-  );
+  font-size:
+    clamp(24px, 5vw, 45px);
 
   font-weight: 900;
 
-  letter-spacing:
-    .10em;
+  letter-spacing: .08em;
 
-  line-height: 1.1;
-
-  color: #ffffff;
-
-  text-shadow:
-    0 2px 12px
-    rgba(255,255,255,.10);
+  line-height: 1.15;
 }
 
 .brand-short {
   color: var(--red);
+
+  margin-left: 8px;
 }
 
 
@@ -287,21 +257,20 @@ header {
 
   overflow: hidden;
 
-  margin:
-    20px
-    auto
-    0;
+  margin-top: 20px;
 
-  padding:
-    10px 0;
+  padding: 11px 0;
 
   border-top:
     1px solid
-    rgba(255,30,30,.18);
+    rgba(255,30,30,.25);
 
   border-bottom:
     1px solid
-    rgba(255,30,30,.18);
+    rgba(255,30,30,.25);
+
+  background:
+    rgba(255,0,0,.025);
 }
 
 .tagline {
@@ -309,38 +278,36 @@ header {
 
   white-space: nowrap;
 
-  color: #ff2929;
+  color: var(--red);
 
-  font-size: clamp(
-    13px,
-    2.3vw,
-    20px
-  );
+  font-size:
+    clamp(12px, 2.2vw, 18px);
 
   font-weight: 900;
 
-  letter-spacing:
-    .13em;
+  letter-spacing: .12em;
+
+  text-shadow:
+    0 0 12px
+    rgba(255,0,0,.45);
 
   animation:
-    taglineMove
+    moveTagline
     14s
     linear
     infinite;
-
-  text-shadow:
-    0 0 10px
-    rgba(255,0,0,.45);
 }
 
-@keyframes taglineMove {
+@keyframes moveTagline {
 
-  0% {
-    transform: translateX(100%);
+  from {
+    transform:
+      translateX(100%);
   }
 
-  100% {
-    transform: translateX(-100%);
+  to {
+    transform:
+      translateX(-100%);
   }
 
 }
@@ -351,72 +318,188 @@ header {
 ================================ */
 
 main {
-  width: min(
-    1250px,
-    calc(100% - 28px)
-  );
+  width:
+    min(1250px, calc(100% - 28px));
 
   margin:
-    28px
-    auto
+    30px auto
     60px;
 }
 
 
 /* ================================
-   TOP BAR
+   INTRO
 ================================ */
 
-.topbar {
-  display: flex;
+.intro {
+  text-align: center;
 
-  gap: 12px;
+  padding:
+    20px 10px
+    35px;
+}
+
+.intro-label {
+  color: var(--red);
+
+  font-size: 12px;
+
+  font-weight: 900;
+
+  letter-spacing: .25em;
+
+  margin-bottom: 15px;
+}
+
+.intro h1 {
+  font-size:
+    clamp(30px, 7vw, 58px);
+
+  line-height: 1.05;
+
+  font-weight: 900;
+
+  margin-bottom: 20px;
+}
+
+.intro h1 span {
+  color: var(--red);
+}
+
+.intro p {
+  max-width: 800px;
+
+  margin: auto;
+
+  color: var(--muted);
+
+  font-size:
+    clamp(14px, 2vw, 18px);
+
+  line-height: 1.7;
+}
+
+
+/* ================================
+   FEATURE BOXES
+================================ */
+
+.feature-row {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 10px;
+
+  margin:
+    0 auto
+    40px;
+
+  max-width: 900px;
+}
+
+.feature-box {
+  padding: 13px 10px;
+
+  text-align: center;
+
+  border:
+    1px solid
+    rgba(255,255,255,.10);
+
+  border-radius: 9px;
+
+  background:
+    rgba(255,255,255,.025);
+
+  color: #c7cdd2;
+
+  font-size: 11px;
+
+  font-weight: 800;
+
+  letter-spacing: .07em;
+}
+
+.feature-box::before {
+  content: "◆";
+
+  color: var(--red);
+
+  margin-right: 7px;
+}
+
+
+/* ================================
+   CATALOGUE TITLE
+================================ */
+
+.catalogue-label {
+  text-align: center;
+
+  color: var(--red);
+
+  font-size: 12px;
+
+  font-weight: 900;
+
+  letter-spacing: .28em;
+
+  margin-bottom: 10px;
+}
+
+.catalogue-title {
+  text-align: center;
+
+  font-size:
+    clamp(28px, 6vw, 45px);
+
+  margin-bottom: 25px;
+}
+
+
+/* ================================
+   SEARCH
+================================ */
+
+.controls {
+  display: flex;
 
   flex-wrap: wrap;
 
-  align-items: center;
+  gap: 10px;
 
-  justify-content: space-between;
-
-  margin-bottom: 24px;
+  margin-bottom: 25px;
 }
 
-.search-box {
+.search-input {
   flex: 1 1 300px;
 
-  position: relative;
-}
-
-.search-box input {
-  width: 100%;
+  min-width: 0;
 
   padding:
-    15px
-    18px;
-
-  border-radius: 12px;
+    15px 17px;
 
   border:
     1px solid
     var(--border);
 
-  background:
-    rgba(255,255,255,.045);
-
-  color: white;
+  border-radius: 11px;
 
   outline: none;
 
-  font-size: 15px;
+  background:
+    rgba(255,255,255,.035);
 
-  transition:
-    border-color .25s,
-    box-shadow .25s;
+  color: white;
+
+  font-size: 15px;
 }
 
-.search-box input:focus {
+.search-input:focus {
   border-color:
-    rgba(255,40,40,.65);
+    rgba(255,30,30,.65);
 
   box-shadow:
     0 0 0 3px
@@ -424,65 +507,44 @@ main {
 }
 
 .category-select {
-  flex: 0 1 220px;
+  flex:
+    0 1 220px;
 
   padding:
-    15px
-    18px;
-
-  border-radius: 12px;
+    15px 17px;
 
   border:
     1px solid
     var(--border);
+
+  border-radius: 11px;
+
+  outline: none;
 
   background:
     #0d1218;
 
   color: white;
 
-  outline: none;
-
   font-size: 15px;
 }
 
 
 /* ================================
-   SECTION TITLE
+   COUNT
 ================================ */
 
-.section-heading {
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  gap: 15px;
-
-  margin:
-    30px 0
-    18px;
-}
-
-.section-heading h2 {
-  font-size:
-    clamp(21px, 4vw, 30px);
-
-  letter-spacing:
-    .06em;
-}
-
-.section-heading span {
-  color:
-    var(--muted);
+.product-count {
+  color: var(--muted);
 
   font-size: 13px;
+
+  margin-bottom: 15px;
 }
 
 
 /* ================================
-   PRODUCTS GRID
+   GRID
 ================================ */
 
 .products-grid {
@@ -491,10 +553,7 @@ main {
   grid-template-columns:
     repeat(
       auto-fit,
-      minmax(
-        250px,
-        1fr
-      )
+      minmax(250px, 1fr)
     );
 
   gap: 18px;
@@ -502,7 +561,7 @@ main {
 
 
 /* ================================
-   PRODUCT CARD
+   CARD
 ================================ */
 
 .product-card {
@@ -510,81 +569,27 @@ main {
 
   overflow: hidden;
 
+  border:
+    1px solid
+    rgba(255,255,255,.11);
+
+  border-radius: 17px;
+
   background:
     linear-gradient(
       145deg,
-      rgba(20,26,33,.96),
-      rgba(7,10,14,.98)
+      #131920,
+      #080b0f
     );
 
-  border:
-    1px solid
-    rgba(255,255,255,.10);
-
-  border-radius: 18px;
-
-  min-height: 100%;
+  box-shadow:
+    0 15px 40px
+    rgba(0,0,0,.30);
 
   transition:
     transform .3s ease,
     border-color .3s ease,
     box-shadow .3s ease;
-
-  box-shadow:
-    0 12px 35px
-    rgba(0,0,0,.25);
-}
-
-.product-card::before {
-  content: "";
-
-  position: absolute;
-
-  inset: 0;
-
-  border-radius: inherit;
-
-  padding: 1px;
-
-  background:
-    linear-gradient(
-      130deg,
-      transparent 25%,
-      rgba(255,35,35,.35),
-      transparent 75%
-    );
-
-  mask:
-    linear-gradient(#000 0 0)
-    content-box,
-    linear-gradient(#000 0 0);
-
-  mask-composite:
-    exclude;
-
-  opacity: .4;
-
-  animation:
-    borderFlow
-    5s
-    linear
-    infinite;
-
-  pointer-events: none;
-}
-
-@keyframes borderFlow {
-
-  0% {
-    transform:
-      translateX(-30%);
-  }
-
-  100% {
-    transform:
-      translateX(30%);
-  }
-
 }
 
 .product-card:hover {
@@ -592,44 +597,42 @@ main {
     translateY(-5px);
 
   border-color:
-    rgba(255,35,35,.45);
+    rgba(255,30,30,.45);
 
   box-shadow:
-    0 18px 45px
-    rgba(0,0,0,.45),
-    0 0 28px
-    rgba(255,20,20,.08);
+    0 20px 50px
+    rgba(0,0,0,.50);
 }
 
 
 /* ================================
-   PRODUCT IMAGE
+   CARD IMAGE
 ================================ */
 
 .product-image {
+  position: relative;
+
   width: 100%;
 
   height: 230px;
 
-  background:
-    radial-gradient(
-      circle,
-      rgba(255,255,255,.08),
-      rgba(0,0,0,.4)
-    );
-
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
   overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle,
+      #1b2229,
+      #080b0f
+    );
 }
 
 .product-image img {
   width: 100%;
-
   height: 100%;
 
   object-fit: cover;
@@ -641,151 +644,41 @@ main {
 .product-card:hover
 .product-image img {
   transform:
-    scale(1.045);
+    scale(1.05);
 }
 
 .image-placeholder {
-  color:
-    #66717c;
-
   text-align: center;
 
-  padding: 30px;
-
-  font-weight: 700;
-
-  letter-spacing: .08em;
-}
-
-
-/* ================================
-   PRODUCT CONTENT
-================================ */
-
-.product-content {
-  padding: 18px;
-}
-
-.product-category {
-  color:
-    #aeb7bf;
-
-  font-size: 11px;
-
-  font-weight: 800;
-
-  letter-spacing:
-    .13em;
-
-  text-transform:
-    uppercase;
-
-  margin-bottom: 8px;
-}
-
-.product-title {
-  font-size: 20px;
-
-  font-weight: 850;
-
-  margin-bottom: 10px;
-
-  line-height: 1.25;
-}
-
-.product-description {
-  color:
-    #9ba5af;
+  color: #5e6973;
 
   font-size: 13px;
 
-  line-height: 1.6;
-
-  min-height: 42px;
-
-  margin-bottom: 15px;
-}
-
-.product-bottom {
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  gap: 10px;
-}
-
-.price {
-  color:
-    #ffffff;
-
-  font-size: 17px;
-
-  font-weight: 850;
-}
-
-.stock {
-  font-size: 11px;
-
   font-weight: 900;
 
-  padding:
-    6px
-    9px;
-
-  border-radius: 999px;
-
-  text-transform:
-    uppercase;
-}
-
-.stock.in {
-  color:
-    #7dff9a;
-
-  background:
-    rgba(20,190,65,.10);
-
-  border:
-    1px solid
-    rgba(20,190,65,.22);
-}
-
-.stock.out {
-  color:
-    #ff6868;
-
-  background:
-    rgba(255,30,30,.10);
-
-  border:
-    1px solid
-    rgba(255,30,30,.22);
+  letter-spacing: .12em;
 }
 
 
 /* ================================
-   FEATURED
+   BADGES
 ================================ */
 
 .featured-badge {
   position: absolute;
 
   top: 12px;
-
   left: 12px;
 
-  z-index: 2;
+  z-index: 5;
 
   padding:
     7px 10px;
 
-  border-radius:
-    999px;
+  border-radius: 6px;
 
   background:
-    rgba(255,25,25,.90);
+    var(--red);
 
   color: white;
 
@@ -793,12 +686,95 @@ main {
 
   font-weight: 900;
 
-  letter-spacing:
-    .08em;
+  letter-spacing: .07em;
+}
 
-  box-shadow:
-    0 5px 18px
-    rgba(255,0,0,.25);
+.stock-badge {
+  position: absolute;
+
+  top: 12px;
+  right: 12px;
+
+  z-index: 5;
+
+  padding:
+    7px 10px;
+
+  border-radius: 6px;
+
+  font-size: 10px;
+
+  font-weight: 900;
+
+  background:
+    rgba(0,0,0,.65);
+
+  border:
+    1px solid
+    rgba(255,255,255,.15);
+}
+
+.stock-in {
+  color: #62ef8b;
+}
+
+.stock-out {
+  color: #ff6868;
+}
+
+
+/* ================================
+   CARD CONTENT
+================================ */
+
+.product-content {
+  padding: 17px;
+}
+
+.product-category {
+  color:
+    #8d98a3;
+
+  font-size: 10px;
+
+  font-weight: 900;
+
+  letter-spacing: .14em;
+
+  text-transform: uppercase;
+
+  margin-bottom: 8px;
+}
+
+.product-title {
+  font-size: 20px;
+
+  font-weight: 900;
+
+  line-height: 1.25;
+
+  margin-bottom: 9px;
+}
+
+.product-description {
+  color:
+    #8d98a3;
+
+  font-size: 13px;
+
+  line-height: 1.55;
+
+  min-height: 40px;
+
+  margin-bottom: 14px;
+}
+
+.product-price {
+  font-size: 17px;
+
+  font-weight: 900;
+
+  margin-bottom: 13px;
 }
 
 
@@ -806,79 +782,87 @@ main {
    BUTTONS
 ================================ */
 
-.buttons {
+.button-row {
   display: grid;
 
   grid-template-columns:
     1fr 1fr;
 
-  gap: 9px;
-
-  margin-top: 16px;
+  gap: 8px;
 }
 
-.btn {
-  border: none;
+.button {
+  display: flex;
 
-  border-radius: 10px;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 42px;
 
   padding:
-    11px
-    12px;
+    9px 8px;
+
+  border-radius: 9px;
+
+  border: none;
 
   cursor: pointer;
 
-  font-weight: 800;
+  font-size: 11px;
 
-  font-size: 12px;
+  font-weight: 900;
+
+  text-decoration: none;
 
   transition:
-    transform .2s,
-    opacity .2s;
+    transform .2s ease,
+    opacity .2s ease;
 }
 
-.btn:hover {
+.button:hover {
   transform:
     translateY(-2px);
+
+  opacity: .92;
 }
 
-.btn-view {
-  background:
-    #202832;
-
+.view-button {
   color: white;
+
+  background:
+    #222b34;
 
   border:
     1px solid
-    rgba(255,255,255,.08);
+    rgba(255,255,255,.10);
 }
 
-.btn-wa {
+.whatsapp-button {
+  color: white;
+
   background:
     #20b95a;
-
-  color: white;
 }
 
 
 /* ================================
-   EMPTY STATE
+   EMPTY
 ================================ */
 
 .empty {
-  padding:
-    60px 20px;
+  grid-column: 1 / -1;
+
+  padding: 60px 20px;
 
   text-align: center;
 
   border:
     1px dashed
-    rgba(255,255,255,.12);
+    rgba(255,255,255,.15);
 
-  border-radius: 16px;
+  border-radius: 15px;
 
-  color:
-    #7e8994;
+  color: var(--muted);
 }
 
 
@@ -891,21 +875,20 @@ main {
 
   inset: 0;
 
-  z-index: 1000;
+  z-index: 9999;
 
   display: none;
 
   align-items: center;
-
   justify-content: center;
 
   padding: 15px;
 
   background:
-    rgba(0,0,0,.80);
+    rgba(0,0,0,.84);
 
   backdrop-filter:
-    blur(10px);
+    blur(9px);
 }
 
 .modal.show {
@@ -916,86 +899,80 @@ main {
   position: relative;
 
   width:
-    min(
-      950px,
-      100%
-    );
+    min(950px, 100%);
 
   max-height:
     92vh;
 
   overflow-y: auto;
 
-  border-radius: 20px;
-
   border:
     1px solid
-    rgba(255,255,255,.12);
+    rgba(255,255,255,.14);
+
+  border-radius: 20px;
 
   background:
     linear-gradient(
       145deg,
       #11171e,
-      #06090d
+      #05080b
     );
 
   box-shadow:
-    0 30px 90px
-    rgba(0,0,0,.65);
+    0 30px 100px
+    rgba(0,0,0,.7);
 }
 
-.modal-close {
+.close-button {
   position: absolute;
 
-  right: 14px;
+  top: 12px;
+  right: 12px;
 
-  top: 14px;
+  z-index: 10;
 
-  z-index: 5;
-
-  width: 40px;
-
-  height: 40px;
+  width: 42px;
+  height: 42px;
 
   border-radius: 50%;
 
   border:
     1px solid
-    rgba(255,255,255,.15);
+    rgba(255,255,255,.18);
 
   background:
-    rgba(0,0,0,.60);
+    rgba(0,0,0,.65);
 
   color: white;
 
-  font-size: 20px;
+  font-size: 22px;
 
   cursor: pointer;
 }
 
-.modal-content {
+.modal-grid {
   display: grid;
 
   grid-template-columns:
-    minmax(0, 1.1fr)
-    minmax(0, .9fr);
+    1.1fr .9fr;
 }
 
 .gallery {
   padding: 20px;
 }
 
-.main-gallery-image {
+.main-image {
   width: 100%;
 
-  height: 450px;
-
-  border-radius: 14px;
+  height: 440px;
 
   object-fit: cover;
 
+  border-radius: 14px;
+
   background:
-    #0a0e13;
+    #090d11;
 }
 
 .thumbnails {
@@ -1010,92 +987,111 @@ main {
 
 .thumbnail {
   width: 65px;
-
   height: 65px;
+
+  flex-shrink: 0;
 
   object-fit: cover;
 
   border-radius: 8px;
 
-  cursor: pointer;
-
   border:
     1px solid
     rgba(255,255,255,.12);
+
+  cursor: pointer;
 }
 
-.details {
+.modal-details {
   padding:
     35px 25px 25px;
 }
 
-.details .category {
+.modal-category {
   color:
-    #aeb7bf;
+    #9ba5ae;
 
   font-size: 11px;
 
-  letter-spacing:
-    .15em;
+  font-weight: 900;
 
-  font-weight: 800;
-
-  text-transform:
-    uppercase;
+  letter-spacing: .15em;
 
   margin-bottom: 10px;
 }
 
-.details h2 {
+.modal-details h2 {
   font-size:
-    clamp(25px, 5vw, 38px);
+    clamp(25px, 5vw, 40px);
 
   line-height: 1.15;
 
   margin-bottom: 15px;
 }
 
-.details .detail-price {
+.modal-price {
   font-size: 24px;
 
   font-weight: 900;
 
-  margin-bottom: 14px;
+  margin-bottom: 15px;
 }
 
-.details-description {
+.modal-description {
   color:
-    #a4adb6;
+    #9ba5ae;
 
   line-height: 1.7;
 
   font-size: 14px;
 
-  margin-bottom: 22px;
+  margin-bottom: 25px;
 }
 
-.big-wa {
-  display: inline-flex;
+.modal-action {
+  display: flex;
 
-  align-items: center;
+  flex-direction: column;
 
-  justify-content: center;
+  gap: 10px;
+}
 
+.modal-action a,
+.modal-action button {
   width: 100%;
 
-  padding:
-    14px;
+  min-height: 48px;
 
-  border-radius: 12px;
+  display: flex;
 
-  background:
-    #20b95a;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  border: none;
+
+  cursor: pointer;
 
   color: white;
 
-  text-decoration: none;
-
   font-weight: 900;
+
+  text-decoration: none;
+}
+
+.modal-whatsapp {
+  background:
+    #20b95a;
+}
+
+.modal-share {
+  background:
+    #202832;
+
+  border:
+    1px solid
+    rgba(255,255,255,.10) !important;
 }
 
 
@@ -1104,27 +1100,26 @@ main {
 ================================ */
 
 footer {
-  border-top:
-    1px solid
-    rgba(255,255,255,.08);
+  text-align: center;
 
   padding:
     30px 20px;
 
-  text-align: center;
+  border-top:
+    1px solid
+    rgba(255,255,255,.08);
 
   color:
-    #69747e;
+    #68737d;
 
   font-size: 12px;
 
-  letter-spacing:
-    .05em;
+  line-height: 1.7;
 }
 
 footer strong {
   color:
-    #c6cdd3;
+    #c9d0d5;
 }
 
 
@@ -1132,25 +1127,22 @@ footer strong {
    MOBILE
 ================================ */
 
-@media (max-width: 720px) {
+@media (max-width: 750px) {
 
   header {
     padding:
-      25px 14px 20px;
+      22px 12px;
   }
 
   .main-logo {
     width:
-      min(
-        340px,
-        88vw
-      );
+      min(350px, 90vw);
 
     max-height: 190px;
   }
 
   .brand-name {
-    font-size: 24px;
+    font-size: 23px;
   }
 
   main {
@@ -1160,15 +1152,20 @@ footer strong {
     margin-top: 20px;
   }
 
+  .feature-row {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
   .products-grid {
     grid-template-columns:
-      repeat(2, minmax(0,1fr));
+      repeat(2, minmax(0, 1fr));
 
     gap: 10px;
   }
 
   .product-image {
-    height: 155px;
+    height: 160px;
   }
 
   .product-content {
@@ -1181,40 +1178,33 @@ footer strong {
 
   .product-description {
     font-size: 11px;
-
-    min-height: 34px;
   }
 
-  .price {
+  .product-price {
     font-size: 13px;
   }
 
-  .stock {
-    font-size: 8px;
-  }
-
-  .buttons {
+  .button-row {
     grid-template-columns:
       1fr;
-
-    gap: 6px;
   }
 
-  .btn {
-    padding: 9px 6px;
+  .button {
+    min-height: 37px;
+
     font-size: 10px;
   }
 
-  .modal-content {
+  .modal-grid {
     grid-template-columns:
       1fr;
   }
 
-  .main-gallery-image {
+  .main-image {
     height: 280px;
   }
 
-  .details {
+  .modal-details {
     padding:
       10px 18px 22px;
   }
@@ -1234,36 +1224,10 @@ footer strong {
 
 }
 
-
-/* ================================
-   SCROLLBAR
-================================ */
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background:
-    #05070a;
-}
-
-::-webkit-scrollbar-thumb {
-  background:
-    #303942;
-
-  border-radius:
-    999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background:
-    #ff2525;
-}
-
 </style>
 
 </head>
+
 
 <body>
 
@@ -1272,27 +1236,32 @@ footer strong {
 
   <div class="logo-wrap">
 
-    <!-- REAL GITHUB LOGO SERVED BY WORKER -->
     <img
       class="main-logo"
-      src="/aop-logo.png?v=2"
+      src="/aop-logo.png?v=3"
       alt="ALANG ORIGINAL PRODUCTS AOP Logo"
-      onerror="this.style.display='none';"
     >
 
   </div>
 
 
   <div class="brand-name">
+
     ALANG ORIGINAL PRODUCTS
-    <span class="brand-short">AOP</span>
+
+    <span class="brand-short">
+      AOP
+    </span>
+
   </div>
 
 
   <div class="tagline-window">
 
     <div class="tagline">
+
       ALL ORIGINAL ALANG PRODUCTS WILL BE AVAILABLE HERE.
+
     </div>
 
   </div>
@@ -1302,51 +1271,93 @@ footer strong {
 
 <main>
 
-  <div class="topbar">
 
-    <div class="search-box">
+<section class="intro">
 
-      <input
-        id="searchInput"
-        type="search"
-        placeholder="Search products..."
-        autocomplete="off"
-      >
-
-    </div>
-
-
-    <select
-      id="categorySelect"
-      class="category-select"
-    >
-
-      <option value="all">
-        All Categories
-      </option>
-
-    </select>
-
+  <div class="intro-label">
+    ALANG INDUSTRIAL MARKET
   </div>
 
+  <h1>
+    ORIGINAL <span>ALANG</span><br>
+    PRODUCTS
+  </h1>
 
-  <div class="section-heading">
+  <p>
+    Discover original industrial products from Alang, Gujarat.
+    Explore products, check availability and contact us directly
+    for product inquiries.
+  </p>
 
-    <h2>
-      ORIGINAL ALANG PRODUCTS
-    </h2>
+</section>
 
-    <span id="productCount">
-      0 Products
-    </span>
 
+<div class="feature-row">
+
+  <div class="feature-box">
+    ORIGINAL PRODUCTS
   </div>
 
+  <div class="feature-box">
+    ALANG INDUSTRIAL MARKET
+  </div>
 
-  <div
-    id="productsGrid"
-    class="products-grid"
-  ></div>
+  <div class="feature-box">
+    DIRECT INQUIRY
+  </div>
+
+  <div class="feature-box">
+    QUALITY FOCUSED
+  </div>
+
+</div>
+
+
+<div class="catalogue-label">
+  AOP CATALOGUE
+</div>
+
+<h2 class="catalogue-title">
+  FEATURED PRODUCTS
+</h2>
+
+
+<div class="controls">
+
+  <input
+    id="searchInput"
+    class="search-input"
+    type="search"
+    placeholder="Search products..."
+  >
+
+  <select
+    id="categorySelect"
+    class="category-select"
+  >
+
+    <option value="all">
+      All Categories
+    </option>
+
+  </select>
+
+</div>
+
+
+<div
+  id="productCount"
+  class="product-count"
+>
+  0 Products
+</div>
+
+
+<div
+  id="productsGrid"
+  class="products-grid"
+></div>
+
 
 </main>
 
@@ -1357,7 +1368,7 @@ footer strong {
     ALANG ORIGINAL PRODUCTS (AOP)
   </strong>
 
-  <br><br>
+  <br>
 
   Original industrial products from Alang, Gujarat.
 
@@ -1369,25 +1380,20 @@ footer strong {
 <div
   id="productModal"
   class="modal"
-  onclick="closeModal(event)"
 >
 
-  <div
-    class="modal-box"
-    onclick="event.stopPropagation()"
-  >
+  <div class="modal-box">
 
     <button
-      class="modal-close"
-      onclick="hideModal()"
-      aria-label="Close"
+      id="closeModal"
+      class="close-button"
     >
       ×
     </button>
 
     <div
       id="modalContent"
-      class="modal-content"
+      class="modal-grid"
     ></div>
 
   </div>
@@ -1397,72 +1403,154 @@ footer strong {
 
 <script>
 
-const PRODUCTS_DATA = ${JSON.stringify(getProducts())};
+const PRODUCTS_DATA =
+  ${JSON.stringify(PRODUCTS)};
 
-const whatsappNumber =
+const WHATSAPP =
   ${JSON.stringify(WHATSAPP_NUMBER)};
 
 
-function escapeClient(value = "") {
+/* ================================
+   DOM
+================================ */
 
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+const grid =
+  document.getElementById(
+    "productsGrid"
+  );
 
-}
+const searchInput =
+  document.getElementById(
+    "searchInput"
+  );
+
+const categorySelect =
+  document.getElementById(
+    "categorySelect"
+  );
+
+const productCount =
+  document.getElementById(
+    "productCount"
+  );
+
+const modal =
+  document.getElementById(
+    "productModal"
+  );
+
+const modalContent =
+  document.getElementById(
+    "modalContent"
+  );
+
+const closeModal =
+  document.getElementById(
+    "closeModal"
+  );
 
 
 /* ================================
-   CATEGORY LIST
+   CATEGORIES
 ================================ */
 
-function setupCategories() {
-
-  const select =
-    document.getElementById(
-      "categorySelect"
-    );
+function loadCategories() {
 
   const categories =
-    [
-      ...new Set(
-        PRODUCTS_DATA
-          .map(p => p.category)
-          .filter(Boolean)
-      )
-    ]
-    .sort();
+    [];
 
-  categories.forEach(category => {
+  PRODUCTS_DATA.forEach(
+    function(product) {
 
-    const option =
-      document.createElement(
-        "option"
+      if (
+        product.category &&
+        !categories.includes(
+          product.category
+        )
+      ) {
+
+        categories.push(
+          product.category
+        );
+
+      }
+
+    }
+  );
+
+  categories.sort();
+
+  categories.forEach(
+    function(category) {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+      option.value =
+        category;
+
+      option.textContent =
+        category;
+
+      categorySelect.appendChild(
+        option
       );
 
-    option.value = category;
-
-    option.textContent = category;
-
-    select.appendChild(option);
-
-  });
+    }
+  );
 
 }
 
 
 /* ================================
-   IMAGE
+   WHATSAPP LINK
 ================================ */
 
-function getFirstImage(product) {
+function getWhatsAppLink(product) {
+
+  if (!WHATSAPP) {
+    return "#";
+  }
+
+  const productUrl =
+    window.location.origin +
+    window.location.pathname +
+    "?product=" +
+    encodeURIComponent(
+      product.id
+    );
+
+  const message =
+    "Hello, I am interested in this product: " +
+    product.name +
+    " | Product Link: " +
+    productUrl;
+
+  return (
+    "https://wa.me/" +
+    WHATSAPP +
+    "?text=" +
+    encodeURIComponent(
+      message
+    )
+  );
+
+}
+
+
+/* ================================
+   PRODUCT IMAGE
+================================ */
+
+function getImage(product) {
 
   if (
-    product.images &&
-    product.images.length
+    Array.isArray(
+      product.images
+    ) &&
+    product.images.length > 0
   ) {
 
     return product.images[0];
@@ -1475,737 +1563,59 @@ function getFirstImage(product) {
 
 
 /* ================================
-   WHATSAPP
+   CREATE CARD
 ================================ */
 
-function whatsappLink(product) {
+function createProductCard(product) {
 
-  const currentUrl =
-    window.location.origin +
-    window.location.pathname +
-    "?product=" +
-    encodeURIComponent(product.id);
+  const card =
+    document.createElement(
+      "article"
+    );
 
-  const message =
-    "Hello, I am interested in this product:%0A%0A" +
-    encodeURIComponent(product.name) +
-    "%0A%0AProduct Link:%0A" +
-    encodeURIComponent(currentUrl);
-
-  if (!whatsappNumber) {
-
-    return "#";
-
-  }
-
-  return (
-    "https://wa.me/" +
-    whatsappNumber +
-    "?text=" +
-    message
-  );
-
-}
+  card.className =
+    "product-card";
 
 
-/* ================================
-   PRODUCT CARD
-================================ */
+  /* Featured */
 
-function createCard(product) {
+  if (product.featured) {
 
-  const image =
-    getFirstImage(product);
-
-  const stockClass =
-    String(product.stock)
-      .toLowerCase()
-      .includes("out")
-      ? "out"
-      : "in";
-
-  return \`
-
-    <article class="product-card">
-
-      ${
-        product.featured
-          ? \`
-            <div class="featured-badge">
-              FEATURED
-            </div>
-          \`
-          : ""
-      }
-
-
-      <div class="product-image">
-
-        ${
-          image
-            ? \`
-              <img
-                src="\${escapeClient(image)}"
-                alt="\${escapeClient(product.name)}"
-                loading="lazy"
-              >
-            \`
-            : \`
-              <div class="image-placeholder">
-                AOP PRODUCT<br>
-                IMAGE
-              </div>
-            \`
-        }
-
-      </div>
-
-
-      <div class="product-content">
-
-        <div class="product-category">
-          \${escapeClient(product.category)}
-        </div>
-
-
-        <div class="product-title">
-          \${escapeClient(product.name)}
-        </div>
-
-
-        <div class="product-description">
-          \${escapeClient(product.description)}
-        </div>
-
-
-        <div class="product-bottom">
-
-          <div class="price">
-            \${escapeClient(product.price)}
-          </div>
-
-          <div class="stock \${stockClass}">
-            \${escapeClient(product.stock)}
-          </div>
-
-        </div>
-
-
-        <div class="buttons">
-
-          <button
-            class="btn btn-view"
-            onclick="showProduct(\${Number(product.id)})"
-          >
-            VIEW PRODUCT
-          </button>
-
-
-          ${
-            whatsappNumber
-              ? \`
-                <a
-                  class="btn btn-wa"
-                  href="\${whatsappLink(product)}"
-                  target="_blank"
-                  rel="noopener"
-                  style="text-decoration:none;text-align:center;"
-                >
-                  WHATSAPP
-                </a>
-              \`
-              : \`
-                <button
-                  class="btn btn-wa"
-                  onclick="showProduct(\${Number(product.id)})"
-                >
-                  INQUIRE
-                </button>
-              \`
-          }
-
-        </div>
-
-      </div>
-
-    </article>
-
-  \`;
-
-}
-
-
-/* ================================
-   RENDER PRODUCTS
-================================ */
-
-function renderProducts() {
-
-  const search =
-    document
-      .getElementById("searchInput")
-      .value
-      .trim()
-      .toLowerCase();
-
-  const category =
-    document
-      .getElementById("categorySelect")
-      .value;
-
-
-  const filtered =
-    PRODUCTS_DATA.filter(product => {
-
-      const text =
-        (
-          product.name +
-          " " +
-          product.category +
-          " " +
-          product.description
-        )
-        .toLowerCase();
-
-      const matchesSearch =
-        !search ||
-        text.includes(search);
-
-      const matchesCategory =
-        category === "all" ||
-        product.category === category;
-
-      return (
-        matchesSearch &&
-        matchesCategory
+    const featured =
+      document.createElement(
+        "div"
       );
 
-    });
+    featured.className =
+      "featured-badge";
 
+    featured.textContent =
+      "★ FEATURED";
 
-  const grid =
-    document.getElementById(
-      "productsGrid"
-    );
-
-
-  document.getElementById(
-    "productCount"
-  ).textContent =
-    filtered.length +
-    (
-      filtered.length === 1
-        ? " Product"
-        : " Products"
-    );
-
-
-  if (!filtered.length) {
-
-    grid.innerHTML = \`
-
-      <div class="empty">
-
-        <h3>
-          No products found
-        </h3>
-
-        <br>
-
-        <p>
-          Try another search or category.
-        </p>
-
-      </div>
-
-    \`;
-
-    return;
-
-  }
-
-
-  grid.innerHTML =
-    filtered
-      .map(createCard)
-      .join("");
-
-}
-
-
-/* ================================
-   SHOW PRODUCT
-================================ */
-
-function showProduct(id) {
-
-  const product =
-    PRODUCTS_DATA.find(
-      p => Number(p.id) === Number(id)
-    );
-
-  if (!product) return;
-
-
-  const modal =
-    document.getElementById(
-      "productModal"
-    );
-
-  const content =
-    document.getElementById(
-      "modalContent"
-    );
-
-
-  const images =
-    Array.isArray(product.images)
-      ? product.images.filter(Boolean)
-      : [];
-
-
-  const firstImage =
-    images[0] || "";
-
-
-  let galleryMain =
-    firstImage
-      ? \`
-        <img
-          id="modalMainImage"
-          class="main-gallery-image"
-          src="\${escapeClient(firstImage)}"
-          alt="\${escapeClient(product.name)}"
-        >
-      \`
-      : \`
-        <div
-          class="main-gallery-image"
-          style="
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            color:#69747e;
-          "
-        >
-          PRODUCT IMAGE
-        </div>
-      \`;
-
-
-  let thumbnails = "";
-
-
-  if (images.length > 1) {
-
-    thumbnails =
-      \`
-      <div class="thumbnails">
-
-        \${images.map((img, index) => \`
-
-          <img
-            class="thumbnail"
-            src="\${escapeClient(img)}"
-            alt="Product image \${index + 1}"
-            onclick="
-              document.getElementById('modalMainImage').src =
-              this.src
-            "
-          >
-
-        \`).join("")}
-
-      </div>
-      \`;
-
-  }
-
-
-  const stockClass =
-    String(product.stock)
-      .toLowerCase()
-      .includes("out")
-      ? "out"
-      : "in";
-
-
-  content.innerHTML = \`
-
-    <div class="gallery">
-
-      \${galleryMain}
-
-      \${thumbnails}
-
-    </div>
-
-
-    <div class="details">
-
-      <div class="category">
-        \${escapeClient(product.category)}
-      </div>
-
-
-      <h2>
-        \${escapeClient(product.name)}
-      </h2>
-
-
-      <div class="detail-price">
-        \${escapeClient(product.price)}
-      </div>
-
-
-      <div class="stock \${stockClass}"
-        style="display:inline-block;margin-bottom:18px;"
-      >
-        \${escapeClient(product.stock)}
-      </div>
-
-
-      <div class="details-description">
-        \${escapeClient(product.description)}
-      </div>
-
-
-      ${
-        whatsappNumber
-          ? \`
-            <a
-              class="big-wa"
-              href="\${whatsappLink(product)}"
-              target="_blank"
-              rel="noopener"
-            >
-              INQUIRE ON WHATSAPP
-            </a>
-          \`
-          : \`
-            <button
-              class="big-wa"
-              style="border:0;cursor:pointer;"
-              onclick="alert('WhatsApp contact will be available soon.')"
-            >
-              WHATSAPP INQUIRY
-            </button>
-          \`
-      }
-
-
-      <button
-        class="big-wa"
-        style="
-          margin-top:10px;
-          background:#202832;
-          border:1px solid rgba(255,255,255,.10);
-          cursor:pointer;
-        "
-        onclick="shareProduct(\${Number(product.id)})"
-      >
-        SHARE PRODUCT
-      </button>
-
-
-    </div>
-
-  \`;
-
-
-  modal.classList.add(
-    "show"
-  );
-
-
-  history.replaceState(
-    null,
-    "",
-    "?product=" +
-    encodeURIComponent(product.id)
-  );
-
-}
-
-
-/* ================================
-   HIDE MODAL
-================================ */
-
-function hideModal() {
-
-  const modal =
-    document.getElementById(
-      "productModal"
-    );
-
-  modal.classList.remove(
-    "show"
-  );
-
-
-  history.replaceState(
-    null,
-    "",
-    window.location.pathname
-  );
-
-}
-
-
-function closeModal(event) {
-
-  if (
-    event.target.id ===
-    "productModal"
-  ) {
-
-    hideModal();
-
-  }
-
-}
-
-
-/* ================================
-   SHARE PRODUCT
-================================ */
-
-async function shareProduct(id) {
-
-  const url =
-    window.location.origin +
-    window.location.pathname +
-    "?product=" +
-    encodeURIComponent(id);
-
-
-  if (
-    navigator.share
-  ) {
-
-    try {
-
-      await navigator.share({
-        title:
-          "ALANG ORIGINAL PRODUCTS",
-        text:
-          "Check this original Alang product.",
-        url
-      });
-
-      return;
-
-    } catch (e) {}
-
-  }
-
-
-  try {
-
-    await navigator.clipboard.writeText(
-      url
-    );
-
-    alert(
-      "Product link copied successfully."
-    );
-
-  } catch (e) {
-
-    prompt(
-      "Copy this product link:",
-      url
+    card.appendChild(
+      featured
     );
 
   }
 
-}
 
+  /* Image area */
 
-/* ================================
-   EVENTS
-================================ */
-
-document
-  .getElementById("searchInput")
-  .addEventListener(
-    "input",
-    renderProducts
-  );
-
-
-document
-  .getElementById("categorySelect")
-  .addEventListener(
-    "change",
-    renderProducts
-  );
-
-
-document.addEventListener(
-  "keydown",
-  event => {
-
-    if (
-      event.key === "Escape"
-    ) {
-
-      hideModal();
-
-    }
-
-  }
-);
-
-
-/* ================================
-   INITIALIZE
-================================ */
-
-setupCategories();
-
-renderProducts();
-
-
-/* ================================
-   OPEN SHARED PRODUCT
-================================ */
-
-const params =
-  new URLSearchParams(
-    window.location.search
-  );
-
-const productId =
-  params.get("product");
-
-
-if (productId) {
-
-  setTimeout(
-    () => showProduct(productId),
-    150
-  );
-
-}
-
-</script>
-
-</body>
-</html>`;
-}
-
-
-/* ================================
-   WORKER
-================================ */
-
-export default {
-
-  async fetch(request) {
-
-    const url =
-      new URL(request.url);
-
-
-    /*
-      =========================================
-      REAL LOGO ROUTE
-
-      Browser requests:
-
-      /aop-logo.png
-
-      Worker fetches the actual logo from
-      the GitHub repository and serves it
-      from the same website.
-      =========================================
-    */
-
-    if (
-      url.pathname ===
-      "/aop-logo.png"
-    ) {
-
-      try {
-
-        const response =
-          await fetch(
-            LOGO_SOURCE,
-            {
-              cf: {
-                cacheTtl: 300,
-                cacheEverything: true
-              }
-            }
-          );
-
-
-        if (!response.ok) {
-
-          return new Response(
-            "Logo not found",
-            {
-              status: 404
-            }
-          );
-
-        }
-
-
-        return new Response(
-          response.body,
-          {
-            status: 200,
-
-            headers: {
-              "Content-Type":
-                response.headers.get(
-                  "Content-Type"
-                ) ||
-                "image/png",
-
-              "Cache-Control":
-                "public, max-age=300"
-            }
-
-          }
-        );
-
-      } catch (error) {
-
-        return new Response(
-          "Unable to load logo",
-          {
-            status: 500
-          }
-        );
-
-      }
-
-    }
-
-
-    /*
-      =========================================
-      WEBSITE
-      =========================================
-    */
-
-    return new Response(
-      renderPage(),
-      {
-        headers: {
-          "Content-Type":
-            "text/html; charset=UTF-8",
-
-          "Cache-Control":
-            "no-cache"
-        }
-      }
+  const imageBox =
+    document.createElement(
+      "div"
     );
 
-  }
+  imageBox.className =
+    "product-image";
 
-};
+
+  const image =
+    getImage(product);
+
+
+  if (image) {
+
+    const img =
+      document.createElement(
+      
