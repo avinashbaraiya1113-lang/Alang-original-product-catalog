@@ -8,7 +8,7 @@ const PRODUCTS = [
     featured: true,
     images: [],
     description:
-      "Original Alang industrial product. Detailed specifications, availability and multiple product photographs will be available here."
+      "Original Alang industrial product. Detailed specifications and product information will be available here."
   },
   {
     id: 2,
@@ -19,48 +19,34 @@ const PRODUCTS = [
     featured: false,
     images: [],
     description:
-      "Original industrial product sourced from Alang, Gujarat. Contact us for product details and availability."
+      "Original industrial product sourced from Alang, Gujarat."
   }
 ];
 
-/*
-  ============================================================
-  AOP SETTINGS
-  ============================================================
-*/
+/* ================================
+   GLOBAL SETTINGS
+================================ */
 
-/*
-  Add your WhatsApp number later.
-
-  IMPORTANT:
-  Enter country code + number WITHOUT + or spaces.
-
-  Example:
-  919825328625
-
-  For now keep it empty.
-*/
 const WHATSAPP_NUMBER = "";
 
-
 /*
-  Your logo is stored in the GitHub repository as:
-
+  IMPORTANT:
+  The actual logo is stored in:
   src/aop-logo.png
 
-  This temporary URL lets the Cloudflare Worker display it.
+  The Worker serves it through:
+  /aop-logo.png
 */
-const LOGO_URL =
+
+const LOGO_SOURCE =
   "https://raw.githubusercontent.com/avinashbaraiya1113-lang/Alang-original-product-catalog/main/src/aop-logo.png";
 
 
-/*
-  ============================================================
-  PRODUCT HELPERS
-  ============================================================
-*/
+/* ================================
+   HTML ESCAPE
+================================ */
 
-function escapeHTML(value) {
+function escapeHtml(value = "") {
   return String(value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -70,2240 +56,1243 @@ function escapeHTML(value) {
 }
 
 
-function productImage(product) {
+/* ================================
+   PRODUCT DATA
+================================ */
 
-  if (product.images && product.images.length > 0) {
-
-    return `
-      <img
-        src="${escapeHTML(product.images[0])}"
-        alt="${escapeHTML(product.name)}"
-        loading="lazy"
-      >
-    `;
-
-  }
-
-  return `
-    <div class="product-placeholder">
-
-      <div class="placeholder-grid"></div>
-
-      <div class="placeholder-aop">
-        AOP
-      </div>
-
-      <div class="placeholder-label">
-        PRODUCT IMAGE
-      </div>
-
-      <div class="placeholder-line"></div>
-
-    </div>
-  `;
+function getProducts() {
+  return PRODUCTS;
 }
 
 
-function productCard(product) {
+/* ================================
+   MAIN HTML
+================================ */
 
-  const searchData = (
-    product.name +
-    " " +
-    product.category +
-    " " +
-    product.description
-  ).toLowerCase();
-
-  return `
-    <article
-      class="product-card"
-      data-id="${product.id}"
-      data-search="${escapeHTML(searchData)}"
-      data-category="${escapeHTML(product.category.toLowerCase())}"
-    >
-
-      <div class="product-image">
-
-        ${productImage(product)}
-
-        <div class="image-corner top-left"></div>
-        <div class="image-corner top-right"></div>
-        <div class="image-corner bottom-left"></div>
-        <div class="image-corner bottom-right"></div>
-
-        ${
-          product.featured
-            ? `<div class="featured">★ FEATURED</div>`
-            : ""
-        }
-
-        <div
-          class="stock ${
-            product.stock === "In Stock"
-              ? "available"
-              : "sold"
-          }"
-        >
-          <span></span>
-          ${escapeHTML(product.stock)}
-        </div>
-
-        <div class="product-number">
-          AOP-${String(product.id).padStart(3, "0")}
-        </div>
-
-      </div>
-
-
-      <div class="product-content">
-
-        <div class="category">
-          ${escapeHTML(product.category)}
-        </div>
-
-        <h3>
-          ${escapeHTML(product.name)}
-        </h3>
-
-        <p>
-          ${escapeHTML(product.description)}
-        </p>
-
-
-        <div class="product-meta">
-
-          <div class="price">
-            ${escapeHTML(product.price)}
-          </div>
-
-          <div class="photo-count">
-            <span>▧</span>
-            ${product.images ? product.images.length : 0} Photos
-          </div>
-
-        </div>
-
-
-        <div class="product-actions">
-
-          <button
-            class="btn-primary"
-            onclick="openProduct(${product.id})"
-          >
-            VIEW PRODUCT
-          </button>
-
-          <button
-            class="btn-share"
-            onclick="shareProduct(${product.id})"
-            aria-label="Share product"
-          >
-            ↗
-          </button>
-
-        </div>
-
-
-        <button
-          class="whatsapp-btn"
-          onclick="inquire(${product.id})"
-        >
-          <span class="wa-icon">◉</span>
-          WHATSAPP INQUIRY
-        </button>
-
-      </div>
-
-    </article>
-  `;
-}
-
-
-function renderProducts(products) {
-
-  if (!products.length) {
-
-    return `
-      <div class="no-results">
-
-        <div class="no-results-icon">
-          AOP
-        </div>
-
-        <h3>
-          NO PRODUCTS FOUND
-        </h3>
-
-        <p>
-          Try another product name or category.
-        </p>
-
-      </div>
-    `;
-  }
-
-  return products.map(productCard).join("");
-}
-
-
-/*
-  ============================================================
-  HTML
-  ============================================================
-*/
-
-const html = `<!DOCTYPE html>
-
+function renderPage() {
+  return `<!DOCTYPE html>
 <html lang="en">
-
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+/>
+
+<meta
+  name="description"
+  content="ALANG ORIGINAL PRODUCTS - Original industrial products from Alang, Gujarat."
+/>
+
+<title>ALANG ORIGINAL PRODUCTS | AOP</title>
+
+<style>
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #05070a;
+  --panel: #0c1015;
+  --panel2: #111820;
+  --metal: #c5cbd1;
+  --muted: #8d98a3;
+  --white: #f5f7f9;
+  --red: #ff2020;
+  --red-dark: #a40000;
+  --border: rgba(255,255,255,.12);
+  --glow: rgba(255,20,20,.30);
+}
+
+body {
+  background:
+    radial-gradient(
+      circle at 50% -10%,
+      rgba(255,30,30,.14),
+      transparent 38%
+    ),
+    linear-gradient(
+      180deg,
+      #030507 0%,
+      #070a0e 45%,
+      #030507 100%
+    );
+
+  color: var(--white);
+  font-family:
+    Inter,
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ================================
+   INDUSTRIAL BACKGROUND
+================================ */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+
+  background-image:
+    linear-gradient(
+      rgba(255,255,255,.018) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,.018) 1px,
+      transparent 1px
+    );
+
+  background-size: 42px 42px;
+
+  mask-image:
+    linear-gradient(
+      to bottom,
+      black,
+      transparent 85%
+    );
+
+  z-index: -1;
+}
+
+
+/* ================================
+   HEADER
+================================ */
+
+header {
+  position: relative;
+
+  width: 100%;
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  padding:
+    34px
+    20px
+    28px;
 
-  <meta
-    name="theme-color"
-    content="#050607"
-  >
+  text-align: center;
 
-  <meta
-    name="description"
-    content="ALANG ORIGINAL PRODUCTS — Original industrial products from Alang, Gujarat."
-  >
+  border-bottom:
+    1px solid
+    rgba(255,255,255,.10);
 
-  <meta
-    property="og:title"
-    content="ALANG ORIGINAL PRODUCTS | AOP"
-  >
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10,13,17,.97),
+      rgba(5,7,10,.92)
+    );
 
-  <meta
-    property="og:description"
-    content="Original industrial products from Alang, Gujarat."
-  >
+  box-shadow:
+    0 12px 40px
+    rgba(0,0,0,.45);
+}
 
-  <title>
-    ALANG ORIGINAL PRODUCTS | AOP
-  </title>
 
+/* ================================
+   LOGO
+================================ */
 
-  <style>
+.logo-wrap {
+  display: flex;
 
-    /* ========================================================
-       RESET
-       ======================================================== */
+  justify-content: center;
+  align-items: center;
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+  margin-bottom: 22px;
+}
 
+.main-logo {
+  display: block;
 
-    :root {
+  width: min(
+    430px,
+    82vw
+  );
 
-      --red: #e50914;
-      --red-bright: #ff1b26;
-      --red-dark: #720008;
+  max-height: 230px;
 
-      --black: #030405;
-      --dark: #080a0c;
-      --panel: #0d1013;
-      --panel-2: #111519;
+  object-fit: contain;
 
-      --steel: #c9ced2;
-      --steel-dark: #737a80;
+  filter:
+    drop-shadow(
+      0 0 18px
+      rgba(255,20,20,.20)
+    );
 
-      --white: #f5f5f5;
-      --muted: #8d9499;
+  transition:
+    transform .35s ease,
+    filter .35s ease;
+}
 
-      --border: rgba(255,255,255,.12);
+.main-logo:hover {
+  transform: scale(1.025);
 
-      --shadow:
-        0 20px 60px rgba(0,0,0,.55);
-    }
+  filter:
+    drop-shadow(
+      0 0 30px
+      rgba(255,20,20,.35)
+    );
+}
 
 
-    html {
-      scroll-behavior: smooth;
-    }
+/* ================================
+   BRAND NAME
+================================ */
 
+.brand-name {
+  font-size: clamp(
+    25px,
+    5vw,
+    48px
+  );
 
-    body {
+  font-weight: 900;
 
-      font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
+  letter-spacing:
+    .10em;
 
-      background:
+  line-height: 1.1;
 
-        radial-gradient(
-          circle at 50% -15%,
-          rgba(229,9,20,.20),
-          transparent 32%
-        ),
+  color: #ffffff;
 
-        radial-gradient(
-          circle at 100% 50%,
-          rgba(229,9,20,.06),
-          transparent 30%
-        ),
+  text-shadow:
+    0 2px 12px
+    rgba(255,255,255,.10);
+}
 
-        linear-gradient(
-          180deg,
-          #030405 0%,
-          #080a0c 40%,
-          #050607 100%
-        );
+.brand-short {
+  color: var(--red);
+}
 
-      color: var(--white);
 
-      min-height: 100vh;
+/* ================================
+   ANIMATED TAGLINE
+================================ */
 
-      overflow-x: hidden;
-    }
+.tagline-window {
+  width: 100%;
 
+  overflow: hidden;
 
-    /* ========================================================
-       INDUSTRIAL GRID
-       ======================================================== */
+  margin:
+    20px
+    auto
+    0;
 
-    body::before {
+  padding:
+    10px 0;
 
-      content: "";
+  border-top:
+    1px solid
+    rgba(255,30,30,.18);
 
-      position: fixed;
+  border-bottom:
+    1px solid
+    rgba(255,30,30,.18);
+}
 
-      inset: 0;
+.tagline {
+  display: inline-block;
 
-      pointer-events: none;
+  white-space: nowrap;
 
-      opacity: .07;
+  color: #ff2929;
 
-      background-image:
+  font-size: clamp(
+    13px,
+    2.3vw,
+    20px
+  );
 
-        linear-gradient(
-          rgba(255,255,255,.25) 1px,
-          transparent 1px
-        ),
+  font-weight: 900;
 
-        linear-gradient(
-          90deg,
-          rgba(255,255,255,.25) 1px,
-          transparent 1px
-        );
+  letter-spacing:
+    .13em;
 
-      background-size: 48px 48px;
+  animation:
+    taglineMove
+    14s
+    linear
+    infinite;
 
-      mask-image:
-        linear-gradient(
-          to bottom,
-          black,
-          transparent 85%
-        );
+  text-shadow:
+    0 0 10px
+    rgba(255,0,0,.45);
+}
 
-      z-index: 0;
-    }
+@keyframes taglineMove {
 
+  0% {
+    transform: translateX(100%);
+  }
 
-    /* ========================================================
-       HEADER
-       ======================================================== */
+  100% {
+    transform: translateX(-100%);
+  }
 
-    header {
+}
 
-      position: relative;
 
-      text-align: center;
+/* ================================
+   MAIN
+================================ */
 
-      padding:
-        24px
-        18px
-        0;
+main {
+  width: min(
+    1250px,
+    calc(100% - 28px)
+  );
 
-      overflow: hidden;
+  margin:
+    28px
+    auto
+    60px;
+}
 
-      z-index: 2;
-    }
 
+/* ================================
+   TOP BAR
+================================ */
 
-    .top-line {
+.topbar {
+  display: flex;
 
-      height: 2px;
+  gap: 12px;
 
-      width: 100%;
+  flex-wrap: wrap;
 
-      background:
+  align-items: center;
 
-        linear-gradient(
-          90deg,
-          transparent,
-          var(--red),
-          #ffffff,
-          var(--red),
-          transparent
-        );
+  justify-content: space-between;
 
-      box-shadow:
-        0 0 8px var(--red),
-        0 0 22px rgba(229,9,20,.6);
+  margin-bottom: 24px;
+}
 
-      margin-bottom: 28px;
+.search-box {
+  flex: 1 1 300px;
 
-      position: relative;
-    }
+  position: relative;
+}
 
+.search-box input {
+  width: 100%;
 
-    .top-line::after {
+  padding:
+    15px
+    18px;
 
-      content: "";
+  border-radius: 12px;
 
-      position: absolute;
+  border:
+    1px solid
+    var(--border);
 
-      left: -20%;
+  background:
+    rgba(255,255,255,.045);
 
-      top: -2px;
+  color: white;
 
-      width: 20%;
+  outline: none;
 
-      height: 6px;
+  font-size: 15px;
 
-      background: white;
+  transition:
+    border-color .25s,
+    box-shadow .25s;
+}
 
-      filter: blur(4px);
+.search-box input:focus {
+  border-color:
+    rgba(255,40,40,.65);
 
-      animation:
-        scanLine 4s linear infinite;
-    }
+  box-shadow:
+    0 0 0 3px
+    rgba(255,20,20,.08);
+}
 
+.category-select {
+  flex: 0 1 220px;
 
-    @keyframes scanLine {
+  padding:
+    15px
+    18px;
 
-      0% {
-        left: -20%;
-      }
+  border-radius: 12px;
 
-      100% {
-        left: 120%;
-      }
-    }
+  border:
+    1px solid
+    var(--border);
 
+  background:
+    #0d1218;
 
-    /* ========================================================
-       LOGO
-       ======================================================== */
+  color: white;
 
-    .logo-area {
+  outline: none;
 
-      display: flex;
+  font-size: 15px;
+}
 
-      flex-direction: column;
 
-      align-items: center;
+/* ================================
+   SECTION TITLE
+================================ */
 
-      gap: 13px;
-    }
+.section-heading {
+  display: flex;
 
+  justify-content: space-between;
 
-    .main-logo {
+  align-items: center;
 
-      width: min(
-        420px,
+  gap: 15px;
+
+  margin:
+    30px 0
+    18px;
+}
+
+.section-heading h2 {
+  font-size:
+    clamp(21px, 4vw, 30px);
+
+  letter-spacing:
+    .06em;
+}
+
+.section-heading span {
+  color:
+    var(--muted);
+
+  font-size: 13px;
+}
+
+
+/* ================================
+   PRODUCTS GRID
+================================ */
+
+.products-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(
+        250px,
+        1fr
+      )
+    );
+
+  gap: 18px;
+}
+
+
+/* ================================
+   PRODUCT CARD
+================================ */
+
+.product-card {
+  position: relative;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(20,26,33,.96),
+      rgba(7,10,14,.98)
+    );
+
+  border:
+    1px solid
+    rgba(255,255,255,.10);
+
+  border-radius: 18px;
+
+  min-height: 100%;
+
+  transition:
+    transform .3s ease,
+    border-color .3s ease,
+    box-shadow .3s ease;
+
+  box-shadow:
+    0 12px 35px
+    rgba(0,0,0,.25);
+}
+
+.product-card::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  border-radius: inherit;
+
+  padding: 1px;
+
+  background:
+    linear-gradient(
+      130deg,
+      transparent 25%,
+      rgba(255,35,35,.35),
+      transparent 75%
+    );
+
+  mask:
+    linear-gradient(#000 0 0)
+    content-box,
+    linear-gradient(#000 0 0);
+
+  mask-composite:
+    exclude;
+
+  opacity: .4;
+
+  animation:
+    borderFlow
+    5s
+    linear
+    infinite;
+
+  pointer-events: none;
+}
+
+@keyframes borderFlow {
+
+  0% {
+    transform:
+      translateX(-30%);
+  }
+
+  100% {
+    transform:
+      translateX(30%);
+  }
+
+}
+
+.product-card:hover {
+  transform:
+    translateY(-5px);
+
+  border-color:
+    rgba(255,35,35,.45);
+
+  box-shadow:
+    0 18px 45px
+    rgba(0,0,0,.45),
+    0 0 28px
+    rgba(255,20,20,.08);
+}
+
+
+/* ================================
+   PRODUCT IMAGE
+================================ */
+
+.product-image {
+  width: 100%;
+
+  height: 230px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,255,255,.08),
+      rgba(0,0,0,.4)
+    );
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  overflow: hidden;
+}
+
+.product-image img {
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+
+  transition:
+    transform .4s ease;
+}
+
+.product-card:hover
+.product-image img {
+  transform:
+    scale(1.045);
+}
+
+.image-placeholder {
+  color:
+    #66717c;
+
+  text-align: center;
+
+  padding: 30px;
+
+  font-weight: 700;
+
+  letter-spacing: .08em;
+}
+
+
+/* ================================
+   PRODUCT CONTENT
+================================ */
+
+.product-content {
+  padding: 18px;
+}
+
+.product-category {
+  color:
+    #aeb7bf;
+
+  font-size: 11px;
+
+  font-weight: 800;
+
+  letter-spacing:
+    .13em;
+
+  text-transform:
+    uppercase;
+
+  margin-bottom: 8px;
+}
+
+.product-title {
+  font-size: 20px;
+
+  font-weight: 850;
+
+  margin-bottom: 10px;
+
+  line-height: 1.25;
+}
+
+.product-description {
+  color:
+    #9ba5af;
+
+  font-size: 13px;
+
+  line-height: 1.6;
+
+  min-height: 42px;
+
+  margin-bottom: 15px;
+}
+
+.product-bottom {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 10px;
+}
+
+.price {
+  color:
+    #ffffff;
+
+  font-size: 17px;
+
+  font-weight: 850;
+}
+
+.stock {
+  font-size: 11px;
+
+  font-weight: 900;
+
+  padding:
+    6px
+    9px;
+
+  border-radius: 999px;
+
+  text-transform:
+    uppercase;
+}
+
+.stock.in {
+  color:
+    #7dff9a;
+
+  background:
+    rgba(20,190,65,.10);
+
+  border:
+    1px solid
+    rgba(20,190,65,.22);
+}
+
+.stock.out {
+  color:
+    #ff6868;
+
+  background:
+    rgba(255,30,30,.10);
+
+  border:
+    1px solid
+    rgba(255,30,30,.22);
+}
+
+
+/* ================================
+   FEATURED
+================================ */
+
+.featured-badge {
+  position: absolute;
+
+  top: 12px;
+
+  left: 12px;
+
+  z-index: 2;
+
+  padding:
+    7px 10px;
+
+  border-radius:
+    999px;
+
+  background:
+    rgba(255,25,25,.90);
+
+  color: white;
+
+  font-size: 10px;
+
+  font-weight: 900;
+
+  letter-spacing:
+    .08em;
+
+  box-shadow:
+    0 5px 18px
+    rgba(255,0,0,.25);
+}
+
+
+/* ================================
+   BUTTONS
+================================ */
+
+.buttons {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 9px;
+
+  margin-top: 16px;
+}
+
+.btn {
+  border: none;
+
+  border-radius: 10px;
+
+  padding:
+    11px
+    12px;
+
+  cursor: pointer;
+
+  font-weight: 800;
+
+  font-size: 12px;
+
+  transition:
+    transform .2s,
+    opacity .2s;
+}
+
+.btn:hover {
+  transform:
+    translateY(-2px);
+}
+
+.btn-view {
+  background:
+    #202832;
+
+  color: white;
+
+  border:
+    1px solid
+    rgba(255,255,255,.08);
+}
+
+.btn-wa {
+  background:
+    #20b95a;
+
+  color: white;
+}
+
+
+/* ================================
+   EMPTY STATE
+================================ */
+
+.empty {
+  padding:
+    60px 20px;
+
+  text-align: center;
+
+  border:
+    1px dashed
+    rgba(255,255,255,.12);
+
+  border-radius: 16px;
+
+  color:
+    #7e8994;
+}
+
+
+/* ================================
+   MODAL
+================================ */
+
+.modal {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 1000;
+
+  display: none;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 15px;
+
+  background:
+    rgba(0,0,0,.80);
+
+  backdrop-filter:
+    blur(10px);
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-box {
+  position: relative;
+
+  width:
+    min(
+      950px,
+      100%
+    );
+
+  max-height:
+    92vh;
+
+  overflow-y: auto;
+
+  border-radius: 20px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.12);
+
+  background:
+    linear-gradient(
+      145deg,
+      #11171e,
+      #06090d
+    );
+
+  box-shadow:
+    0 30px 90px
+    rgba(0,0,0,.65);
+}
+
+.modal-close {
+  position: absolute;
+
+  right: 14px;
+
+  top: 14px;
+
+  z-index: 5;
+
+  width: 40px;
+
+  height: 40px;
+
+  border-radius: 50%;
+
+  border:
+    1px solid
+    rgba(255,255,255,.15);
+
+  background:
+    rgba(0,0,0,.60);
+
+  color: white;
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+.modal-content {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.1fr)
+    minmax(0, .9fr);
+}
+
+.gallery {
+  padding: 20px;
+}
+
+.main-gallery-image {
+  width: 100%;
+
+  height: 450px;
+
+  border-radius: 14px;
+
+  object-fit: cover;
+
+  background:
+    #0a0e13;
+}
+
+.thumbnails {
+  display: flex;
+
+  gap: 8px;
+
+  overflow-x: auto;
+
+  margin-top: 10px;
+}
+
+.thumbnail {
+  width: 65px;
+
+  height: 65px;
+
+  object-fit: cover;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  border:
+    1px solid
+    rgba(255,255,255,.12);
+}
+
+.details {
+  padding:
+    35px 25px 25px;
+}
+
+.details .category {
+  color:
+    #aeb7bf;
+
+  font-size: 11px;
+
+  letter-spacing:
+    .15em;
+
+  font-weight: 800;
+
+  text-transform:
+    uppercase;
+
+  margin-bottom: 10px;
+}
+
+.details h2 {
+  font-size:
+    clamp(25px, 5vw, 38px);
+
+  line-height: 1.15;
+
+  margin-bottom: 15px;
+}
+
+.details .detail-price {
+  font-size: 24px;
+
+  font-weight: 900;
+
+  margin-bottom: 14px;
+}
+
+.details-description {
+  color:
+    #a4adb6;
+
+  line-height: 1.7;
+
+  font-size: 14px;
+
+  margin-bottom: 22px;
+}
+
+.big-wa {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  width: 100%;
+
+  padding:
+    14px;
+
+  border-radius: 12px;
+
+  background:
+    #20b95a;
+
+  color: white;
+
+  text-decoration: none;
+
+  font-weight: 900;
+}
+
+
+/* ================================
+   FOOTER
+================================ */
+
+footer {
+  border-top:
+    1px solid
+    rgba(255,255,255,.08);
+
+  padding:
+    30px 20px;
+
+  text-align: center;
+
+  color:
+    #69747e;
+
+  font-size: 12px;
+
+  letter-spacing:
+    .05em;
+}
+
+footer strong {
+  color:
+    #c6cdd3;
+}
+
+
+/* ================================
+   MOBILE
+================================ */
+
+@media (max-width: 720px) {
+
+  header {
+    padding:
+      25px 14px 20px;
+  }
+
+  .main-logo {
+    width:
+      min(
+        340px,
         88vw
       );
 
-      max-height: 190px;
+    max-height: 190px;
+  }
 
-      object-fit: contain;
+  .brand-name {
+    font-size: 24px;
+  }
 
-      filter:
-        drop-shadow(
-          0 0 18px
-          rgba(229,9,20,.22)
-        );
+  main {
+    width:
+      calc(100% - 20px);
 
-      animation:
-        logoAppear .9s ease both;
-    }
+    margin-top: 20px;
+  }
 
+  .products-grid {
+    grid-template-columns:
+      repeat(2, minmax(0,1fr));
 
-    @keyframes logoAppear {
+    gap: 10px;
+  }
 
-      from {
+  .product-image {
+    height: 155px;
+  }
 
-        opacity: 0;
+  .product-content {
+    padding: 12px;
+  }
 
-        transform:
-          scale(.92)
-          translateY(-10px);
-      }
+  .product-title {
+    font-size: 15px;
+  }
 
-      to {
+  .product-description {
+    font-size: 11px;
 
-        opacity: 1;
+    min-height: 34px;
+  }
 
-        transform:
-          scale(1)
-          translateY(0);
-      }
-    }
+  .price {
+    font-size: 13px;
+  }
 
+  .stock {
+    font-size: 8px;
+  }
 
-    /* ========================================================
-       BRAND NAME
-       ======================================================== */
+  .buttons {
+    grid-template-columns:
+      1fr;
 
-    .brand-name {
+    gap: 6px;
+  }
 
-      font-size:
-        clamp(
-          23px,
-          6vw,
-          48px
-        );
+  .btn {
+    padding: 9px 6px;
+    font-size: 10px;
+  }
 
-      font-weight: 900;
+  .modal-content {
+    grid-template-columns:
+      1fr;
+  }
 
-      letter-spacing:
-        clamp(
-          1px,
-          .7vw,
-          5px
-        );
+  .main-gallery-image {
+    height: 280px;
+  }
 
-      text-transform: uppercase;
+  .details {
+    padding:
+      10px 18px 22px;
+  }
 
-      color: #ffffff;
+}
 
-      text-shadow:
-        0 0 20px
-        rgba(255,255,255,.08);
-    }
+@media (max-width: 390px) {
 
+  .products-grid {
+    grid-template-columns:
+      1fr;
+  }
 
-    .brand-name span {
+  .product-image {
+    height: 210px;
+  }
 
-      color: var(--red);
+}
 
-      text-shadow:
-        0 0 18px
-        rgba(229,9,20,.35);
-    }
 
+/* ================================
+   SCROLLBAR
+================================ */
 
-    /* ========================================================
-       MOVING TAGLINE
-       ======================================================== */
+::-webkit-scrollbar {
+  width: 8px;
+}
 
-    .tagline-window {
+::-webkit-scrollbar-track {
+  background:
+    #05070a;
+}
 
-      margin:
-        28px auto
-        0;
+::-webkit-scrollbar-thumb {
+  background:
+    #303942;
 
-      max-width: 1100px;
+  border-radius:
+    999px;
+}
 
-      overflow: hidden;
+::-webkit-scrollbar-thumb:hover {
+  background:
+    #ff2525;
+}
 
-      position: relative;
-
-      border-top:
-        1px solid
-        rgba(229,9,20,.65);
-
-      border-bottom:
-        1px solid
-        rgba(229,9,20,.65);
-
-      background:
-        linear-gradient(
-          90deg,
-          rgba(229,9,20,.03),
-          rgba(255,255,255,.035),
-          rgba(229,9,20,.03)
-        );
-
-      box-shadow:
-
-        inset
-        0 0 25px
-        rgba(229,9,20,.06),
-
-        0 0 25px
-        rgba(0,0,0,.6);
-    }
-
-
-    .tagline-window::before,
-    .tagline-window::after {
-
-      content: "";
-
-      position: absolute;
-
-      top: 0;
-
-      width: 80px;
-
-      height: 100%;
-
-      z-index: 2;
-
-      pointer-events: none;
-    }
-
-
-    .tagline-window::before {
-
-      left: 0;
-
-      background:
-        linear-gradient(
-          90deg,
-          #050607,
-          transparent
-        );
-    }
-
-
-    .tagline-window::after {
-
-      right: 0;
-
-      background:
-        linear-gradient(
-          270deg,
-          #050607,
-          transparent
-        );
-    }
-
-
-    .tagline {
-
-      display: inline-block;
-
-      white-space: nowrap;
-
-      padding:
-        14px
-        0;
-
-      font-size: 13px;
-
-      font-weight: 900;
-
-      letter-spacing: 3px;
-
-      color:
-        var(--red-bright);
-
-      text-shadow:
-        0 0 12px
-        rgba(229,9,20,.7);
-
-      animation:
-        marquee 16s linear infinite;
-    }
-
-
-    @keyframes marquee {
-
-      from {
-        transform: translateX(100%);
-      }
-
-      to {
-        transform: translateX(-100%);
-      }
-    }
-
-
-    /* ========================================================
-       HERO
-       ======================================================== */
-
-    .hero {
-
-      position: relative;
-
-      max-width: 1100px;
-
-      margin:
-        35px auto
-        0;
-
-      padding:
-        40px 20px
-        45px;
-
-      text-align: center;
-
-      z-index: 1;
-    }
-
-
-    .hero::before {
-
-      content: "";
-
-      position: absolute;
-
-      width: 280px;
-
-      height: 280px;
-
-      left: 50%;
-
-      top: 20px;
-
-      transform:
-        translateX(-50%);
-
-      background:
-        radial-gradient(
-          circle,
-          rgba(229,9,20,.09),
-          transparent 70%
-        );
-
-      filter: blur(20px);
-
-      pointer-events: none;
-    }
-
-
-    .hero-kicker {
-
-      color: var(--red);
-
-      font-size: 11px;
-
-      font-weight: 900;
-
-      letter-spacing: 5px;
-
-      margin-bottom: 15px;
-
-      position: relative;
-    }
-
-
-    .hero h1 {
-
-      position: relative;
-
-      font-size:
-        clamp(
-          38px,
-          8vw,
-          76px
-        );
-
-      line-height: .95;
-
-      text-transform: uppercase;
-
-      letter-spacing:
-        clamp(
-          1px,
-          .5vw,
-          4px
-        );
-
-      margin-bottom: 23px;
-    }
-
-
-    .hero h1 .red {
-
-      color: var(--red);
-
-      text-shadow:
-        0 0 30px
-        rgba(229,9,20,.3);
-    }
-
-
-    .hero p {
-
-      position: relative;
-
-      max-width: 730px;
-
-      margin: auto;
-
-      color: var(--muted);
-
-      line-height: 1.8;
-
-      font-size: 15px;
-    }
-
-
-    /* ========================================================
-       BADGES
-       ======================================================== */
-
-    .hero-badges {
-
-      display: flex;
-
-      flex-wrap: wrap;
-
-      justify-content: center;
-
-      gap: 10px;
-
-      margin-top: 28px;
-
-      position: relative;
-    }
-
-
-    .badge {
-
-      border:
-        1px solid
-        rgba(255,255,255,.12);
-
-      padding:
-        10px 15px;
-
-      background:
-        rgba(255,255,255,.025);
-
-      font-size: 10px;
-
-      font-weight: 900;
-
-      letter-spacing: 1.5px;
-
-      color: #c7c9ca;
-
-      position: relative;
-
-      overflow: hidden;
-    }
-
-
-    .badge::before {
-
-      content: "◆";
-
-      color: var(--red);
-
-      margin-right: 7px;
-    }
-
-
-    .badge::after {
-
-      content: "";
-
-      position: absolute;
-
-      left: -100%;
-
-      top: 0;
-
-      width: 50%;
-
-      height: 100%;
-
-      background:
-        linear-gradient(
-          90deg,
-          transparent,
-          rgba(255,255,255,.08),
-          transparent
-        );
-
-      animation:
-        badgeShine 5s linear infinite;
-    }
-
-
-    @keyframes badgeShine {
-
-      0% {
-        left: -100%;
-      }
-
-      30%,
-      100% {
-        left: 150%;
-      }
-    }
-
-
-    /* ========================================================
-       CATALOGUE
-       ======================================================== */
-
-    .catalogue {
-
-      position: relative;
-
-      max-width: 1250px;
-
-      margin: auto;
-
-      padding:
-        15px 18px
-        80px;
-
-      z-index: 2;
-    }
-
-
-    .section-title {
-
-      text-align: center;
-
-      margin-bottom: 28px;
-    }
-
-
-    .section-title small {
-
-      color: var(--red);
-
-      font-size: 11px;
-
-      letter-spacing: 5px;
-
-      font-weight: 900;
-    }
-
-
-    .section-title h2 {
-
-      margin-top: 8px;
-
-      font-size:
-        clamp(
-          28px,
-          5vw,
-          42px
-        );
-
-      text-transform: uppercase;
-
-      letter-spacing: 1px;
-    }
-
-
-    .section-line {
-
-      width: 80px;
-
-      height: 2px;
-
-      background: var(--red);
-
-      margin:
-        15px auto
-        0;
-
-      box-shadow:
-        0 0 12px
-        rgba(229,9,20,.8);
-    }
-
-
-    /* ========================================================
-       SEARCH
-       ======================================================== */
-
-    .tools {
-
-      display: flex;
-
-      gap: 10px;
-
-      max-width: 1000px;
-
-      margin:
-        0 auto
-        30px;
-
-      flex-wrap: wrap;
-    }
-
-
-    .search-wrap {
-
-      flex: 1;
-
-      min-width: 220px;
-
-      position: relative;
-    }
-
-
-    .search {
-
-      width: 100%;
-
-      padding:
-        15px
-        45px
-        15px
-        16px;
-
-      background:
-        rgba(10,12,14,.9);
-
-      color: white;
-
-      border:
-        1px solid
-        rgba(255,255,255,.13);
-
-      outline: none;
-
-      border-radius: 4px;
-
-      font-size: 14px;
-    }
-
-
-    .search:focus {
-
-      border-color:
-        var(--red);
-
-      box-shadow:
-        0 0 18px
-        rgba(229,9,20,.13);
-    }
-
-
-    .search-icon {
-
-      position: absolute;
-
-      right: 15px;
-
-      top: 50%;
-
-      transform:
-        translateY(-50%);
-
-      color: #777;
-
-      pointer-events: none;
-    }
-
-
-    .category-btn {
-
-      padding:
-        12px 16px;
-
-      min-height: 48px;
-
-      background:
-        #0e1113;
-
-      color: #aaa;
-
-      border:
-        1px solid
-        rgba(255,255,255,.12);
-
-      cursor: pointer;
-
-      border-radius: 4px;
-
-      font-weight: 800;
-
-      font-size: 11px;
-
-      letter-spacing: 1px;
-
-      transition: .25s;
-    }
-
-
-    .category-btn:hover,
-    .category-btn.active {
-
-      background:
-        var(--red);
-
-      color: white;
-
-      border-color:
-        var(--red);
-
-      box-shadow:
-        0 0 18px
-        rgba(229,9,20,.25);
-    }
-
-
-    /* ========================================================
-       PRODUCTS GRID
-       ======================================================== */
-
-    .products {
-
-      display: grid;
-
-      grid-template-columns:
-        repeat(
-          auto-fit,
-          minmax(
-            280px,
-            1fr
-          )
-        );
-
-      gap: 22px;
-    }
-
-
-    /* ========================================================
-       PRODUCT CARD
-       ======================================================== */
-
-    .product-card {
-
-      position: relative;
-
-      background:
-        linear-gradient(
-          145deg,
-          rgba(255,255,255,.055),
-          rgba(255,255,255,.012)
-        );
-
-      border:
-        1px solid
-        rgba(255,255,255,.11);
-
-      overflow: hidden;
-
-      transition:
-        transform .35s ease,
-        border-color .35s ease,
-        box-shadow .35s ease;
-
-      box-shadow:
-        0 12px 35px
-        rgba(0,0,0,.35);
-    }
-
-
-    .product-card:hover {
-
-      transform:
-        translateY(-7px);
-
-      border-color:
-        rgba(229,9,20,.55);
-
-      box-shadow:
-        0 25px 60px
-        rgba(0,0,0,.55),
-        0 0 25px
-        rgba(229,9,20,.08);
-    }
-
-
-    .product-card::after {
-
-      content: "";
-
-      position: absolute;
-
-      top: 0;
-
-      left: -100%;
-
-      width: 60%;
-
-      height: 1px;
-
-      background:
-        linear-gradient(
-          90deg,
-          transparent,
-          var(--red),
-          transparent
-        );
-
-      transition:
-        left .7s ease;
-    }
-
-
-    .product-card:hover::after {
-
-      left: 140%;
-    }
-
-
-    /* ========================================================
-       PRODUCT IMAGE
-       ======================================================== */
-
-    .product-image {
-
-      height: 255px;
-
-      background:
-        #080a0c;
-
-      position: relative;
-
-      overflow: hidden;
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: center;
-    }
-
-
-    .product-image img {
-
-      width: 100%;
-
-      height: 100%;
-
-      object-fit: cover;
-
-      transition:
-        transform .5s ease;
-    }
-
-
-    .product-card:hover
-    .product-image img {
-
-      transform:
-        scale(1.04);
-    }
-
-
-    /* ========================================================
-       PRODUCT PLACEHOLDER
-       ======================================================== */
-
-    .product-placeholder {
-
-      width: 100%;
-
-      height: 100%;
-
-      display: flex;
-
-      flex-direction: column;
-
-      align-items: center;
-
-      justify-content: center;
-
-      position: relative;
-
-      background:
-
-        radial-gradient(
-          circle at center,
-          #20252a,
-          #070809 65%
-        );
-
-      overflow: hidden;
-    }
-
-
-    .placeholder-grid {
-
-      position: absolute;
-
-      inset: 0;
-
-      opacity: .12;
-
-      background-image:
-
-        linear-gradient(
-          rgba(255,255,255,.25) 1px,
-          transparent 1px
-        ),
-
-        linear-gradient(
-          90deg,
-          rgba(255,255,255,.25) 1px,
-          transparent 1px
-        );
-
-      background-size:
-        28px 28px;
-    }
-
-
-    .placeholder-aop {
-
-      position: relative;
-
-      font-size: 58px;
-
-      font-weight: 900;
-
-      letter-spacing: 8px;
-
-      color: #30363b;
-
-      text-shadow:
-        0 2px 0 #080909;
-    }
-
-
-    .placeholder-label {
-
-      position: relative;
-
-      color: #646b70;
-
-      font-size: 9px;
-
-      letter-spacing: 4px;
-
-      margin-top: 5px;
-    }
-
-
-    .placeholder-line {
-
-      position: relative;
-
-      width: 90px;
-
-      height: 1px;
-
-      margin-top: 13px;
-
-      background:
-        var(--red);
-
-      box-shadow:
-        0 0 10px
-        var(--red);
-    }
-
-
-    /* ========================================================
-       CORNERS
-       ======================================================== */
-
-    .image-corner {
-
-      position: absolute;
-
-      width: 18px;
-
-      height: 18px;
-
-      z-index: 3;
-
-      opacity: .8;
-    }
-
-
-    .top-left {
-
-      top: 10px;
-
-      left: 10px;
-
-      border-top:
-        1px solid var(--red);
-
-      border-left:
-        1px solid var(--red);
-    }
-
-
-    .top-right {
-
-      top: 10px;
-
-      right: 10px;
-
-      border-top:
-        1px solid var(--red);
-
-      border-right:
-        1px solid var(--red);
-    }
-
-
-    .bottom-left {
-
-      bottom: 10px;
-
-      left: 10px;
-
-      border-bottom:
-        1px solid var(--red);
-
-      border-left:
-        1px solid var(--red);
-    }
-
-
-    .bottom-right {
-
-      bottom: 10px;
-
-      right: 10px;
-
-      border-bottom:
-        1px solid var(--red);
-
-      border-right:
-        1px solid var(--red);
-    }
-
-
-    /* ========================================================
-       BADGES
-       ======================================================== */
-
-    .featured {
-
-      position: absolute;
-
-      top: 14px;
-
-      left: 14px;
-
-      background:
-        var(--red);
-
-      color: white;
-
-      padding:
-        7px 10px;
-
-      font-size: 9px;
-
-      font-weight: 900;
-
-      letter-spacing: 1px;
-
-      box-shadow:
-        0 0 18px
-        rgba(229,9,20,.25);
-    }
-
-
-    .stock {
-
-      position: absolute;
-
-      top: 14px;
-
-      right: 14px;
-
-      background:
-        rgba(0,0,0,.78);
-
-      border:
-        1px solid
-        rgba(255,255,255,.16);
-
-      padding:
-        7px 10px;
-
-      font-size: 9px;
-
-      font-weight: 900;
-
-      letter-spacing: 1px;
-
-      backdrop-filter:
-        blur(6px);
-    }
-
-
-    .stock span {
-
-      display: inline-block;
-
-      width: 6px;
-
-      height: 6px;
-
-      border-radius: 50%;
-
-      margin-right: 6px;
-
-      background: currentColor;
-    }
-
-
-    .stock.available {
-
-      color:
-        #63e68a;
-    }
-
-
-    .stock.sold {
-
-      color:
-        #ff5252;
-    }
-
-
-    .product-number {
-
-      position: absolute;
-
-      bottom: 12px;
-
-      right: 14px;
-
-      color:
-        rgba(255,255,255,.45);
-
-      font-size: 9px;
-
-      font-weight: 900;
-
-      letter-spacing: 2px;
-    }
-
-
-    /* ========================================================
-       PRODUCT CONTENT
-       ======================================================== */
-
-    .product-content {
-
-      padding: 21px;
-    }
-
-
-    .category {
-
-      color:
-        var(--red);
-
-      font-size: 9px;
-
-      letter-spacing: 3px;
-
-      font-weight: 900;
-
-      text-transform: uppercase;
-
-      margin-bottom: 9px;
-    }
-
-
-    .product-content h3 {
-
-      font-size: 20px;
-
-      line-height: 1.2;
-
-      margin-bottom: 10px;
-    }
-
-
-    .product-content p {
-
-      color:
-        #858c91;
-
-      font-size: 13px;
-
-      line-height: 1.65;
-
-      min-height: 65px;
-    }
-
-
-    .product-meta {
-
-      display: flex;
-
-      justify-content:
-        space-between;
-
-      align-items: center;
-
-      gap: 10px;
-
-      border-top:
-        1px solid
-        rgba(255,255,255,.08);
-
-      margin-top: 17px;
-
-      padding-top: 15px;
-    }
-
-
-    .price {
-
-      color: #eeeeee;
-
-      font-size: 17px;
-
-      font-weight: 900;
-    }
-
-
-    .photo-count {
-
-      color: #666d72;
-
-      font-size: 10px;
-
-      font-weight: 700;
-
-      letter-spacing: .5px;
-    }
-
-
-    .photo-count span {
-
-      color:
-        var(--red);
-
-      margin-right: 4px;
-    }
-
-
-    /* ========================================================
-       ACTIONS
-       ======================================================== */
-
-    .product-actions {
-
-      display: flex;
-
-      gap: 8px;
-
-      margin-top: 15px;
-    }
-
-
-    .btn-primary {
-
-      flex: 1;
-
-      border: 0;
-
-      background:
-        var(--red);
-
-      color: white;
-
-      padding:
-        12px;
-
-      cursor: pointer;
-
-      font-size: 10px;
-
-      font-weight: 900;
-
-      letter-spacing: 1px;
-
-      transition: .25s;
-    }
-
-
-    .btn-primary:hover {
-
-      background:
-        var(--red-bright);
-
-      box-shadow:
-        0 0 18px
-        rgba(229,9,20,.3);
-    }
-
-
-    .btn-share {
-
-      width: 45px;
-
-      border:
-        1px solid
-        rgba(255,255,255,.13);
-
-      background:
-        #101316;
-
-      color: #ddd;
-
-      cursor: pointer;
-
-      font-size: 18px;
-
-      transition: .25s;
-    }
-
-
-    .btn-share:hover {
-
-      color:
-        white;
-
-      border-color:
-        var(--red);
-
-      background:
-        #171a1d;
-    }
-
-
-    .whatsapp-btn {
-
-      width: 100%;
-
-      margin-top: 8px;
-
-      border:
-        1px solid
-        rgba(80,220,120,.22);
-
-      background:
-        rgba(50,180,90,.06);
-
-      color:
-        #72df91;
-
-      padding:
-        11px;
-
-      cursor: pointer;
-
-      font-size: 9px;
-
-      font-weight: 900;
-
-      letter-spacing: 1.2px;
-
-      transition: .25s;
-    }
-
-
-    .whatsapp-btn:hover {
-
-      background:
-        rgba(50,180,90,.13);
-
-      border-color:
-        rgba(80,220,120,.5);
-    }
-
-
-    .wa-icon {
-
-      margin-right: 5px;
-    }
-
-
-    /* ========================================================
-       NO RESULTS
-       ======================================================== */
-
-    .no-results {
-
-      grid-column:
-        1 / -1;
-
-      text-align: center;
-
-      padding:
-        70px 20px;
-
-      border:
-        1px solid
-        rgba(255,255,255,.08);
-
-      background:
-        rgba(255,255,255,.02);
-    }
-
-
-    .no-results-icon {
-
-      font-size: 42px;
-
-      font-weight: 900;
-
-      color:
-        #2c3034;
-
-      letter-spacing: 5px;
-
-      margin-bottom: 15px;
-    }
-
-
-    .no-results h3 {
-
-      font-size: 18px;
-
-      margin-bottom: 8px;
-    }
-
-
-    .no-results p {
-
-      color:
-        #6d7478;
-
-      font-size: 13px;
-    }
-
-
-    /* ========================================================
-       PRODUCT MODAL
-       ======================================================== */
-
-    .modal {
-
-      position: fixed;
-
-      inset: 0;
-
-      background:
-        rgba(0,0,0,.88);
-
-      backdrop-filter:
-        blur(10px);
-
-      z-index: 1000;
-
-      display: none;
-
-      align-items: center;
-
-      justify-content: center;
-
-      padding: 18px;
-    }
-
-
-    .modal.show {
-
-      display: flex;
-    }
-
-
-    .modal-box {
-
-      width:
-        min(
-          760px,
-          100%
-        );
-
-      max-height:
-        90vh;
-
-      overflow-y:
-        auto;
-
-      background:
-        linear-gradient(
-          145deg,
-          #15191c,
-          #080a0c
-        );
-
-      border:
-        1px solid
-        rgba(229,9,20,.45);
-
-      box-shadow:
-        0 30px 100px
-        rgba(0,0,0,.75);
-
-      position: relative;
-    }
-
-
-    .modal-close {
-
-      position: absolute;
-
-      right: 12px;
-
-      top: 12px;
-
-      width: 38px;
-
-      height: 38px;
-
-      border:
-        1px solid
-        rgba(255,255,255,.15);
-
-      background:
-        rgba(0,0,0,.65);
-
-      color: white;
-
-      cursor: pointer;
-
-      font-size: 20px;
-
-      z-index: 5;
-    }
-
-
-    .modal-image {
-
-      height:
-        min(
-          420px,
-          55vh
-        );
-
-      background:
-        #070809;
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: center;
-    }
-
-
-    .modal-image img {
-
-      width: 100%;
-
-      height: 100%;
-
-      object-fit: contain;
-    }
-
-
-    .modal-content {
-
-      padding: 25px;
-    }
-
-
-    .modal-content .category {
-
-      margin-bottom: 7px;
-    }
-
-
-    .modal-content h2 {
-
-      font-size:
-        clamp(
-          25px,
-          6vw,
-          38px
-        );
-
-      margin-bottom: 12px;
-    }
-
-
-    .modal-content p {
-
-      color:
-        #92999d;
-
-      line-height: 1.8;
-
-      font-size: 14px;
-    }
-
-
-    .modal-actions {
-
-      display: flex;
-
-      gap: 10px;
-
-      margin-top: 20px;
-    }
-
-
-    .modal-actions button {
-
-      flex: 1;
-
-      padding: 13px;
-
-      border: 0;
-
-      cursor: pointer;
-
-      font-weight: 900;
-
-      font-size: 10px;
-
-      letter-spacing: 1px;
-    }
-
-
-    .modal-wa {
-
-      background:
-        #20a85a;
-
-      color: white;
-    }
-
-
-    .modal-share {
-
-      background:
-        #191d20;
-
-      color: white;
-
-      border:
-        1px solid
-        rgba(255,255,255,.1) !important;
-    }
-
-
-    /* ========================================================
-       FOOTER
-       ======================================================== */
-
-    footer {
-
-      position: relative;
-
-      border-top:
-        1px solid
-        rgba(255,255,255,.1);
-
-      text-align: center;
-
-      padding:
-        40px 20px;
-
-      color:
-        #626a6f;
-
-      font-size: 11px;
-
-      z-index: 2;
-    }
-
-
-    footer strong {
-
-      color:
-        #c9c9c9;
-
-      letter-spacing: 2px;
-    }
-
-
-    .footer-red {
-
-      color:
-        var(--red);
-    }
-
-
-    .footer-line {
-
-      width: 70px;
-
-      height: 1px;
-
-      background:
-        var(--red);
-
-      margin:
-        15px auto;
-    }
-
-
-    /* ========================================================
-       MOBILE
-       ======================================================== */
-
-    @media (max-width: 600px) {
-
-      header {
-
-        padding-top: 18px;
-      }
-
-
-      .main-logo {
-
-        width:
-          min(
-            370px,
-            94vw
-          );
-
-        max-height: 155px;
-      }
-
-
-      .brand-name {
-
-        font-size: 21px;
-
-        letter-spacing: 1.5px;
-      }
-
-
-      .tagline {
-
-        font-size: 11px;
-
-        letter-spacing: 2px;
-      }
-
-
-      .hero {
-
-        margin-top: 10px;
-
-        padding:
-          35px 15px
-          35px;
-      }
-
-
-      .hero h1 {
-
-        font-size: 39px;
-      }
-
-
-      .hero p {
-
-        font-size: 13px;
-      }
-
-
-      .catalogue {
-
-        padding:
-          10px 14px
-          55px;
-      }
-
-
-      .products {
-
-        grid-template-columns:
-          1fr;
-      }
-
-
-      .product-image {
-
-        height: 270px;
-      }
-
-
-      .tools {
-
-        gap: 7px;
-      }
-
-
-      .category-btn {
-
-        flex: 1;
-
-        min-width: 70px;
-      }
-
-
-      .modal {
-
-        padding: 10px;
-      }
-
-
-      .modal-image {
-
-        height: 300px;
-      }
-
-
-      .modal-content {
-
-        padding: 20px;
-      }
-
-    }
-
-
-  </style>
+</style>
 
 </head>
-
 
 <body>
 
 
-<!-- ========================================================
-     HEADER
-     ======================================================== -->
-
 <header>
 
-  <div class="top-line"></div>
+  <div class="logo-wrap">
 
-
-  <div class="logo-area">
-
+    <!-- REAL GITHUB LOGO SERVED BY WORKER -->
     <img
       class="main-logo"
-      src="${LOGO_URL}"
+      src="/aop-logo.png?v=2"
       alt="ALANG ORIGINAL PRODUCTS AOP Logo"
+      onerror="this.style.display='none';"
     >
 
+  </div>
 
-    <div class="brand-name">
 
-      ALANG
-      <span>ORIGINAL PRODUCTS</span>
-
-    </div>
-
+  <div class="brand-name">
+    ALANG ORIGINAL PRODUCTS
+    <span class="brand-short">AOP</span>
   </div>
 
 
   <div class="tagline-window">
 
     <div class="tagline">
-
       ALL ORIGINAL ALANG PRODUCTS WILL BE AVAILABLE HERE.
-      &nbsp;&nbsp; ◆ &nbsp;&nbsp;
-      ALL ORIGINAL ALANG PRODUCTS WILL BE AVAILABLE HERE.
-      &nbsp;&nbsp; ◆ &nbsp;&nbsp;
-
     </div>
 
   </div>
@@ -2311,748 +1300,908 @@ const html = `<!DOCTYPE html>
 </header>
 
 
+<main>
 
-<!-- ========================================================
-     HERO
-     ======================================================== -->
+  <div class="topbar">
 
-<section class="hero">
-
-  <div class="hero-kicker">
-    AOP • ALANG • GUJARAT
-  </div>
-
-
-  <h1>
-
-    ORIGINAL
-    <span class="red">ALANG</span>
-    <br>
-    PRODUCTS
-
-  </h1>
-
-
-  <p>
-
-    Discover original industrial products from Alang, Gujarat.
-    Explore available products, view product information,
-    check stock status and contact us directly for inquiries.
-
-  </p>
-
-
-  <div class="hero-badges">
-
-    <div class="badge">
-      ORIGINAL PRODUCTS
-    </div>
-
-    <div class="badge">
-      ALANG INDUSTRIAL MARKET
-    </div>
-
-    <div class="badge">
-      DIRECT INQUIRY
-    </div>
-
-    <div class="badge">
-      QUALITY FOCUSED
-    </div>
-
-  </div>
-
-</section>
-
-
-
-<!-- ========================================================
-     CATALOGUE
-     ======================================================== -->
-
-<section
-  class="catalogue"
-  id="catalogue"
->
-
-
-  <div class="section-title">
-
-    <small>
-      AOP CATALOGUE
-    </small>
-
-    <h2>
-      Featured Products
-    </h2>
-
-    <div class="section-line"></div>
-
-  </div>
-
-
-
-  <!-- SEARCH + CATEGORY -->
-
-  <div class="tools">
-
-
-    <div class="search-wrap">
+    <div class="search-box">
 
       <input
-        id="search"
-        class="search"
+        id="searchInput"
         type="search"
         placeholder="Search products..."
         autocomplete="off"
-        oninput="filterProducts()"
       >
-
-      <span class="search-icon">
-        ⌕
-      </span>
 
     </div>
 
 
-    <button
-      class="category-btn active"
-      onclick="setCategory('all', this)"
+    <select
+      id="categorySelect"
+      class="category-select"
     >
-      ALL
-    </button>
 
+      <option value="all">
+        All Categories
+      </option>
 
-    <button
-      class="category-btn"
-      onclick="setCategory('industrial', this)"
-    >
-      INDUSTRIAL
-    </button>
-
-
-    <button
-      class="category-btn"
-      onclick="setCategory('metal', this)"
-    >
-      METAL
-    </button>
-
+    </select>
 
   </div>
 
 
+  <div class="section-heading">
 
-  <!-- PRODUCTS -->
+    <h2>
+      ORIGINAL ALANG PRODUCTS
+    </h2>
+
+    <span id="productCount">
+      0 Products
+    </span>
+
+  </div>
+
 
   <div
-    id="products"
-    class="products"
-  >
+    id="productsGrid"
+    class="products-grid"
+  ></div>
 
-    ${renderProducts(PRODUCTS)}
-
-  </div>
+</main>
 
 
-</section>
+<footer>
+
+  <strong>
+    ALANG ORIGINAL PRODUCTS (AOP)
+  </strong>
+
+  <br><br>
+
+  Original industrial products from Alang, Gujarat.
+
+</footer>
 
 
-
-<!-- ========================================================
-     PRODUCT MODAL
-     ======================================================== -->
+<!-- PRODUCT MODAL -->
 
 <div
   id="productModal"
   class="modal"
-  onclick="closeModalOutside(event)"
+  onclick="closeModal(event)"
 >
 
-  <div class="modal-box">
-
+  <div
+    class="modal-box"
+    onclick="event.stopPropagation()"
+  >
 
     <button
       class="modal-close"
-      onclick="closeModal()"
+      onclick="hideModal()"
+      aria-label="Close"
     >
       ×
     </button>
 
-
-    <div
-      id="modalImage"
-      class="modal-image"
-    >
-    </div>
-
-
     <div
       id="modalContent"
       class="modal-content"
-    >
-    </div>
-
+    ></div>
 
   </div>
 
 </div>
 
 
-
-<!-- ========================================================
-     FOOTER
-     ======================================================== -->
-
-<footer>
-
-  <strong>
-    ALANG ORIGINAL PRODUCTS
-  </strong>
-
-
-  <div class="footer-line"></div>
-
-
-  <span class="footer-red">
-    AOP
-  </span>
-
-  — Original Industrial Products from Alang, Gujarat
-
-
-  <br><br>
-
-
-  © ${new Date().getFullYear()}
-  AOP.
-  All Rights Reserved.
-
-
-</footer>
-
-
-
 <script>
 
-  /* ========================================================
-     STATE
-     ======================================================== */
+const PRODUCTS_DATA = ${JSON.stringify(getProducts())};
 
-  let currentCategory = "all";
-
-
-  /* ========================================================
-     FILTER PRODUCTS
-     ======================================================== */
-
-  function filterProducts() {
-
-    const searchInput =
-      document.getElementById("search");
-
-    const search =
-      searchInput.value
-        .trim()
-        .toLowerCase();
+const whatsappNumber =
+  ${JSON.stringify(WHATSAPP_NUMBER)};
 
 
-    const filtered =
-      PRODUCTS.filter(product => {
+function escapeClient(value = "") {
 
-        const categoryMatch =
-          currentCategory === "all" ||
-          product.category.toLowerCase() ===
-            currentCategory;
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
 
 
-        const searchText = (
+/* ================================
+   CATEGORY LIST
+================================ */
 
+function setupCategories() {
+
+  const select =
+    document.getElementById(
+      "categorySelect"
+    );
+
+  const categories =
+    [
+      ...new Set(
+        PRODUCTS_DATA
+          .map(p => p.category)
+          .filter(Boolean)
+      )
+    ]
+    .sort();
+
+  categories.forEach(category => {
+
+    const option =
+      document.createElement(
+        "option"
+      );
+
+    option.value = category;
+
+    option.textContent = category;
+
+    select.appendChild(option);
+
+  });
+
+}
+
+
+/* ================================
+   IMAGE
+================================ */
+
+function getFirstImage(product) {
+
+  if (
+    product.images &&
+    product.images.length
+  ) {
+
+    return product.images[0];
+
+  }
+
+  return "";
+
+}
+
+
+/* ================================
+   WHATSAPP
+================================ */
+
+function whatsappLink(product) {
+
+  const currentUrl =
+    window.location.origin +
+    window.location.pathname +
+    "?product=" +
+    encodeURIComponent(product.id);
+
+  const message =
+    "Hello, I am interested in this product:%0A%0A" +
+    encodeURIComponent(product.name) +
+    "%0A%0AProduct Link:%0A" +
+    encodeURIComponent(currentUrl);
+
+  if (!whatsappNumber) {
+
+    return "#";
+
+  }
+
+  return (
+    "https://wa.me/" +
+    whatsappNumber +
+    "?text=" +
+    message
+  );
+
+}
+
+
+/* ================================
+   PRODUCT CARD
+================================ */
+
+function createCard(product) {
+
+  const image =
+    getFirstImage(product);
+
+  const stockClass =
+    String(product.stock)
+      .toLowerCase()
+      .includes("out")
+      ? "out"
+      : "in";
+
+  return \`
+
+    <article class="product-card">
+
+      ${
+        product.featured
+          ? \`
+            <div class="featured-badge">
+              FEATURED
+            </div>
+          \`
+          : ""
+      }
+
+
+      <div class="product-image">
+
+        ${
+          image
+            ? \`
+              <img
+                src="\${escapeClient(image)}"
+                alt="\${escapeClient(product.name)}"
+                loading="lazy"
+              >
+            \`
+            : \`
+              <div class="image-placeholder">
+                AOP PRODUCT<br>
+                IMAGE
+              </div>
+            \`
+        }
+
+      </div>
+
+
+      <div class="product-content">
+
+        <div class="product-category">
+          \${escapeClient(product.category)}
+        </div>
+
+
+        <div class="product-title">
+          \${escapeClient(product.name)}
+        </div>
+
+
+        <div class="product-description">
+          \${escapeClient(product.description)}
+        </div>
+
+
+        <div class="product-bottom">
+
+          <div class="price">
+            \${escapeClient(product.price)}
+          </div>
+
+          <div class="stock \${stockClass}">
+            \${escapeClient(product.stock)}
+          </div>
+
+        </div>
+
+
+        <div class="buttons">
+
+          <button
+            class="btn btn-view"
+            onclick="showProduct(\${Number(product.id)})"
+          >
+            VIEW PRODUCT
+          </button>
+
+
+          ${
+            whatsappNumber
+              ? \`
+                <a
+                  class="btn btn-wa"
+                  href="\${whatsappLink(product)}"
+                  target="_blank"
+                  rel="noopener"
+                  style="text-decoration:none;text-align:center;"
+                >
+                  WHATSAPP
+                </a>
+              \`
+              : \`
+                <button
+                  class="btn btn-wa"
+                  onclick="showProduct(\${Number(product.id)})"
+                >
+                  INQUIRE
+                </button>
+              \`
+          }
+
+        </div>
+
+      </div>
+
+    </article>
+
+  \`;
+
+}
+
+
+/* ================================
+   RENDER PRODUCTS
+================================ */
+
+function renderProducts() {
+
+  const search =
+    document
+      .getElementById("searchInput")
+      .value
+      .trim()
+      .toLowerCase();
+
+  const category =
+    document
+      .getElementById("categorySelect")
+      .value;
+
+
+  const filtered =
+    PRODUCTS_DATA.filter(product => {
+
+      const text =
+        (
           product.name +
           " " +
           product.category +
           " " +
           product.description
+        )
+        .toLowerCase();
 
-        ).toLowerCase();
+      const matchesSearch =
+        !search ||
+        text.includes(search);
+
+      const matchesCategory =
+        category === "all" ||
+        product.category === category;
+
+      return (
+        matchesSearch &&
+        matchesCategory
+      );
+
+    });
 
 
-        const searchMatch =
-          searchText.includes(search);
+  const grid =
+    document.getElementById(
+      "productsGrid"
+    );
 
 
-        return (
-          categoryMatch &&
-          searchMatch
-        );
+  document.getElementById(
+    "productCount"
+  ).textContent =
+    filtered.length +
+    (
+      filtered.length === 1
+        ? " Product"
+        : " Products"
+    );
 
-      });
 
+  if (!filtered.length) {
 
-    document.getElementById("products")
-      .innerHTML =
-        renderProducts(filtered);
+    grid.innerHTML = \`
+
+      <div class="empty">
+
+        <h3>
+          No products found
+        </h3>
+
+        <br>
+
+        <p>
+          Try another search or category.
+        </p>
+
+      </div>
+
+    \`;
+
+    return;
 
   }
 
 
-  /* ========================================================
-     CATEGORY
-     ======================================================== */
+  grid.innerHTML =
+    filtered
+      .map(createCard)
+      .join("");
 
-  function setCategory(category, button) {
-
-    currentCategory =
-      category;
+}
 
 
-    document
-      .querySelectorAll(".category-btn")
-      .forEach(btn => {
+/* ================================
+   SHOW PRODUCT
+================================ */
 
-        btn.classList.remove("active");
+function showProduct(id) {
 
-      });
+  const product =
+    PRODUCTS_DATA.find(
+      p => Number(p.id) === Number(id)
+    );
 
-
-    button.classList.add("active");
-
-
-    filterProducts();
-
-  }
+  if (!product) return;
 
 
-  /* ========================================================
-     OPEN PRODUCT
-     ======================================================== */
+  const modal =
+    document.getElementById(
+      "productModal"
+    );
 
-  function openProduct(id) {
-
-    const product =
-      PRODUCTS.find(
-        item => item.id === id
-      );
-
-
-    if (!product) {
-      return;
-    }
+  const content =
+    document.getElementById(
+      "modalContent"
+    );
 
 
-    const modal =
-      document.getElementById(
-        "productModal"
-      );
+  const images =
+    Array.isArray(product.images)
+      ? product.images.filter(Boolean)
+      : [];
 
 
-    const imageBox =
-      document.getElementById(
-        "modalImage"
-      );
+  const firstImage =
+    images[0] || "";
 
 
-    const contentBox =
-      document.getElementById(
-        "modalContent"
-      );
-
-
-    if (
-      product.images &&
-      product.images.length > 0
-    ) {
-
-      imageBox.innerHTML = `
+  let galleryMain =
+    firstImage
+      ? \`
         <img
-          src="${product.images[0]}"
-          alt="${product.name}"
+          id="modalMainImage"
+          class="main-gallery-image"
+          src="\${escapeClient(firstImage)}"
+          alt="\${escapeClient(product.name)}"
         >
-      `;
-
-    } else {
-
-      imageBox.innerHTML = `
-        <div class="product-placeholder">
-
-          <div class="placeholder-grid"></div>
-
-          <div class="placeholder-aop">
-            AOP
-          </div>
-
-          <div class="placeholder-label">
-            PRODUCT IMAGE
-          </div>
-
-          <div class="placeholder-line"></div>
-
+      \`
+      : \`
+        <div
+          class="main-gallery-image"
+          style="
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#69747e;
+          "
+        >
+          PRODUCT IMAGE
         </div>
-      `;
-
-    }
+      \`;
 
 
-    contentBox.innerHTML = `
+  let thumbnails = "";
+
+
+  if (images.length > 1) {
+
+    thumbnails =
+      \`
+      <div class="thumbnails">
+
+        \${images.map((img, index) => \`
+
+          <img
+            class="thumbnail"
+            src="\${escapeClient(img)}"
+            alt="Product image \${index + 1}"
+            onclick="
+              document.getElementById('modalMainImage').src =
+              this.src
+            "
+          >
+
+        \`).join("")}
+
+      </div>
+      \`;
+
+  }
+
+
+  const stockClass =
+    String(product.stock)
+      .toLowerCase()
+      .includes("out")
+      ? "out"
+      : "in";
+
+
+  content.innerHTML = \`
+
+    <div class="gallery">
+
+      \${galleryMain}
+
+      \${thumbnails}
+
+    </div>
+
+
+    <div class="details">
 
       <div class="category">
-        ${product.category}
+        \${escapeClient(product.category)}
       </div>
+
 
       <h2>
-        ${product.name}
+        \${escapeClient(product.name)}
       </h2>
 
-      <p>
-        ${product.description}
-      </p>
 
-      <div class="product-meta">
-
-        <div class="price">
-          ${product.price}
-        </div>
-
-        <div class="stock ${
-          product.stock === "In Stock"
-            ? "available"
-            : "sold"
-        }">
-
-          <span></span>
-
-          ${product.stock}
-
-        </div>
-
+      <div class="detail-price">
+        \${escapeClient(product.price)}
       </div>
 
 
-      <div class="modal-actions">
-
-        <button
-          class="modal-wa"
-          onclick="inquire(${product.id})"
-        >
-          WHATSAPP INQUIRY
-        </button>
-
-        <button
-          class="modal-share"
-          onclick="shareProduct(${product.id})"
-        >
-          SHARE PRODUCT
-        </button>
-
+      <div class="stock \${stockClass}"
+        style="display:inline-block;margin-bottom:18px;"
+      >
+        \${escapeClient(product.stock)}
       </div>
 
-    `;
 
-
-    modal.classList.add("show");
-
-
-    document.body.style.overflow =
-      "hidden";
-
-
-    /*
-      Update browser URL.
-
-      Example:
-      ?product=1
-    */
-
-    const newUrl =
-      window.location.pathname +
-      "?product=" +
-      product.id;
-
-    history.replaceState(
-      {},
-      "",
-      newUrl
-    );
-
-  }
-
-
-  /* ========================================================
-     CLOSE MODAL
-     ======================================================== */
-
-  function closeModal() {
-
-    const modal =
-      document.getElementById(
-        "productModal"
-      );
-
-
-    modal.classList.remove("show");
-
-
-    document.body.style.overflow =
-      "";
-
-
-    history.replaceState(
-      {},
-      "",
-      window.location.pathname
-    );
-
-  }
-
-
-  function closeModalOutside(event) {
-
-    if (
-      event.target.id ===
-      "productModal"
-    ) {
-
-      closeModal();
-
-    }
-
-  }
-
-
-  /* ========================================================
-     WHATSAPP
-     ======================================================== */
-
-  function inquire(id) {
-
-    const product =
-      PRODUCTS.find(
-        item => item.id === id
-      );
-
-
-    if (!product) {
-      return;
-    }
-
-
-    if (!WHATSAPP_NUMBER) {
-
-      alert(
-        "WhatsApp contact will be added soon.\\n\\nProduct: " +
-        product.name
-      );
-
-      return;
-
-    }
-
-
-    const productUrl =
-      window.location.origin +
-      window.location.pathname +
-      "?product=" +
-      product.id;
-
-
-    const message =
-
-      "Hello ALANG ORIGINAL PRODUCTS,\\n\\n" +
-
-      "I am interested in: " +
-      product.name +
-      "\\n\\n" +
-
-      "Product Link: " +
-      productUrl +
-      "\\n\\n" +
-
-      "Please share more details.";
-
-    
-    const url =
-      "https://wa.me/" +
-      WHATSAPP_NUMBER +
-      "?text=" +
-      encodeURIComponent(message);
-
-
-    window.open(
-      url,
-      "_blank"
-    );
-
-  }
-
-
-  /* ========================================================
-     SHARE PRODUCT
-     ======================================================== */
-
-  async function shareProduct(id) {
-
-    const product =
-      PRODUCTS.find(
-        item => item.id === id
-      );
-
-
-    if (!product) {
-      return;
-    }
-
-
-    const productUrl =
-      window.location.origin +
-      window.location.pathname +
-      "?product=" +
-      product.id;
-
-
-    const shareData = {
-
-      title:
-        product.name +
-        " | ALANG ORIGINAL PRODUCTS",
-
-      text:
-        "Check this original Alang product: " +
-        product.name,
-
-      url:
-        productUrl
-
-    };
-
-
-    try {
-
-      if (
-        navigator.share
-      ) {
-
-        await navigator.share(
-          shareData
-        );
-
-      } else {
-
-        await navigator.clipboard.writeText(
-          productUrl
-        );
-
-        alert(
-          "Product link copied."
-        );
-
+      <div class="details-description">
+        \${escapeClient(product.description)}
+      </div>
+
+
+      ${
+        whatsappNumber
+          ? \`
+            <a
+              class="big-wa"
+              href="\${whatsappLink(product)}"
+              target="_blank"
+              rel="noopener"
+            >
+              INQUIRE ON WHATSAPP
+            </a>
+          \`
+          : \`
+            <button
+              class="big-wa"
+              style="border:0;cursor:pointer;"
+              onclick="alert('WhatsApp contact will be available soon.')"
+            >
+              WHATSAPP INQUIRY
+            </button>
+          \`
       }
 
-    } catch (error) {
 
-      /*
-        User cancelled sharing.
-        No action required.
-      */
-
-    }
-
-  }
-
-
-  /* ========================================================
-     OPEN PRODUCT FROM URL
-     ======================================================== */
-
-  function openProductFromURL() {
-
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
+      <button
+        class="big-wa"
+        style="
+          margin-top:10px;
+          background:#202832;
+          border:1px solid rgba(255,255,255,.10);
+          cursor:pointer;
+        "
+        onclick="shareProduct(\${Number(product.id)})"
+      >
+        SHARE PRODUCT
+      </button>
 
 
-    const productId =
-      Number(
-        params.get("product")
-      );
+    </div>
+
+  \`;
 
 
-    if (!productId) {
-      return;
-    }
-
-
-    const product =
-      PRODUCTS.find(
-        item => item.id === productId
-      );
-
-
-    if (product) {
-
-      setTimeout(
-        () => openProduct(productId),
-        300
-      );
-
-    }
-
-  }
-
-
-  /* ========================================================
-     ESC KEY
-     ======================================================== */
-
-  document.addEventListener(
-    "keydown",
-    event => {
-
-      if (
-        event.key === "Escape"
-      ) {
-
-        closeModal();
-
-      }
-
-    }
+  modal.classList.add(
+    "show"
   );
 
 
-  /* ========================================================
-     START
-     ======================================================== */
+  history.replaceState(
+    null,
+    "",
+    "?product=" +
+    encodeURIComponent(product.id)
+  );
 
-  openProductFromURL();
+}
+
+
+/* ================================
+   HIDE MODAL
+================================ */
+
+function hideModal() {
+
+  const modal =
+    document.getElementById(
+      "productModal"
+    );
+
+  modal.classList.remove(
+    "show"
+  );
+
+
+  history.replaceState(
+    null,
+    "",
+    window.location.pathname
+  );
+
+}
+
+
+function closeModal(event) {
+
+  if (
+    event.target.id ===
+    "productModal"
+  ) {
+
+    hideModal();
+
+  }
+
+}
+
+
+/* ================================
+   SHARE PRODUCT
+================================ */
+
+async function shareProduct(id) {
+
+  const url =
+    window.location.origin +
+    window.location.pathname +
+    "?product=" +
+    encodeURIComponent(id);
+
+
+  if (
+    navigator.share
+  ) {
+
+    try {
+
+      await navigator.share({
+        title:
+          "ALANG ORIGINAL PRODUCTS",
+        text:
+          "Check this original Alang product.",
+        url
+      });
+
+      return;
+
+    } catch (e) {}
+
+  }
+
+
+  try {
+
+    await navigator.clipboard.writeText(
+      url
+    );
+
+    alert(
+      "Product link copied successfully."
+    );
+
+  } catch (e) {
+
+    prompt(
+      "Copy this product link:",
+      url
+    );
+
+  }
+
+}
+
+
+/* ================================
+   EVENTS
+================================ */
+
+document
+  .getElementById("searchInput")
+  .addEventListener(
+    "input",
+    renderProducts
+  );
+
+
+document
+  .getElementById("categorySelect")
+  .addEventListener(
+    "change",
+    renderProducts
+  );
+
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key === "Escape"
+    ) {
+
+      hideModal();
+
+    }
+
+  }
+);
+
+
+/* ================================
+   INITIALIZE
+================================ */
+
+setupCategories();
+
+renderProducts();
+
+
+/* ================================
+   OPEN SHARED PRODUCT
+================================ */
+
+const params =
+  new URLSearchParams(
+    window.location.search
+  );
+
+const productId =
+  params.get("product");
+
+
+if (productId) {
+
+  setTimeout(
+    () => showProduct(productId),
+    150
+  );
+
+}
 
 </script>
 
-
 </body>
-
 </html>`;
+}
 
 
-/*
-  ============================================================
-  CLOUDFLARE WORKER
-  ============================================================
-*/
+/* ================================
+   WORKER
+================================ */
 
 export default {
 
   async fetch(request) {
 
+    const url =
+      new URL(request.url);
+
+
+    /*
+      =========================================
+      REAL LOGO ROUTE
+
+      Browser requests:
+
+      /aop-logo.png
+
+      Worker fetches the actual logo from
+      the GitHub repository and serves it
+      from the same website.
+      =========================================
+    */
+
+    if (
+      url.pathname ===
+      "/aop-logo.png"
+    ) {
+
+      try {
+
+        const response =
+          await fetch(
+            LOGO_SOURCE,
+            {
+              cf: {
+                cacheTtl: 300,
+                cacheEverything: true
+              }
+            }
+          );
+
+
+        if (!response.ok) {
+
+          return new Response(
+            "Logo not found",
+            {
+              status: 404
+            }
+          );
+
+        }
+
+
+        return new Response(
+          response.body,
+          {
+            status: 200,
+
+            headers: {
+              "Content-Type":
+                response.headers.get(
+                  "Content-Type"
+                ) ||
+                "image/png",
+
+              "Cache-Control":
+                "public, max-age=300"
+            }
+
+          }
+        );
+
+      } catch (error) {
+
+        return new Response(
+          "Unable to load logo",
+          {
+            status: 500
+          }
+        );
+
+      }
+
+    }
+
+
+    /*
+      =========================================
+      WEBSITE
+      =========================================
+    */
+
     return new Response(
-      html,
+      renderPage(),
       {
         headers: {
-          "content-type":
+          "Content-Type":
             "text/html; charset=UTF-8",
 
-          "cache-control":
-            "public, max-age=60"
+          "Cache-Control":
+            "no-cache"
         }
       }
     );
