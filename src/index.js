@@ -28,7 +28,9 @@ function json(data, status = 200) {
 function redir(url) {
   return new Response(null, {
     status: 302,
-    headers: { Location: url }
+    headers: {
+      Location: url
+    }
   });
 }
 
@@ -56,23 +58,40 @@ async function sig(value) {
 }
 
 async function session(password) {
-  return await sig(password + "|" + COOKIE);
+  return await sig(String(password || "").trim() + "|" + COOKIE);
 }
 
+/* ================= ADMIN AUTH FIX ================= */
+
 async function auth(request, env) {
-  const cookie = request.headers.get("Cookie") || "";
+  const cookieHeader = request.headers.get("Cookie") || "";
 
-  const match = cookie.match(
-    new RegExp(
-      COOKIE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "=([^;]+)"
-    )
-  );
+  const cookies = {};
 
-  if (!match) return false;
+  cookieHeader.split(";").forEach(function (part) {
+    const index = part.indexOf("=");
 
-  const expected = await session(env.ADMIN_PASSWORD || "");
+    if (index === -1) return;
 
-  return match[1] === expected;
+    const name = part.slice(0, index).trim();
+    const value = part.slice(index + 1).trim();
+
+    cookies[name] = value;
+  });
+
+  const token = cookies[COOKIE];
+
+  if (!token) return false;
+
+  const password = String(
+    env.ADMIN_PASSWORD || ""
+  ).trim();
+
+  if (!password) return false;
+
+  const expected = await session(password);
+
+  return token === expected;
 }
 
 function ck(value) {
@@ -80,7 +99,7 @@ function ck(value) {
     COOKIE +
     "=" +
     value +
-    "; Path=/; HttpOnly; SameSite=Lax; Max-Age=" +
+    "; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=" +
     Math.floor(MAX_AGE / 1000)
   );
 }
@@ -133,6 +152,7 @@ function shell(body, title) {
     "<style>" +
 
     "*{box-sizing:border-box}" +
+
     "html{scroll-behavior:smooth}" +
 
     "body{" +
@@ -164,7 +184,6 @@ function shell(body, title) {
     "text-align:center;" +
     "}" +
 
-    /* LOGO MADE LARGER */
     ".logo{" +
     "width:165px;" +
     "height:165px;" +
@@ -184,13 +203,6 @@ function shell(body, title) {
     ".brand span{" +
     "color:#e21d2e;" +
     "}" +
-
-    /*
-      RED TEXT:
-      NO SCROLLING.
-      STATIC CENTER POSITION.
-      SLOW ZOOM IN / ZOOM OUT.
-    */
 
     ".tag-wrap{" +
     "width:100%;" +
@@ -657,7 +669,6 @@ function shell(body, title) {
 
     ".hero h1{font-size:25px}" +
 
-    /* MOBILE LOGO ALSO LARGER */
     ".logo{" +
     "width:145px;" +
     "height:145px;" +
@@ -743,7 +754,7 @@ function shell(body, title) {
     '" alt="AOP Logo">' +
 
     '<div class="brand">' +
-    'ALANG ORIGINAL PRODUCTS <span>AOP</span>' +
+    "ALANG ORIGINAL PRODUCTS <span>AOP</span>" +
     "</div>" +
 
     '<div class="tag-wrap">' +
@@ -853,28 +864,16 @@ async function publicPage(env) {
     JSON.stringify(WHATSAPP_NUMBER) +
     ";" +
 
-    "function textSafe(v){" +
-    "return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\\\"/g,'&quot;');" +
-    "}" +
-
     "function productLink(id){" +
     "return location.origin+location.pathname+'?product='+encodeURIComponent(id);" +
     "}" +
 
     "function copyText(value){" +
-
     "if(navigator.clipboard){" +
-
     "navigator.clipboard.writeText(value).then(function(){" +
     "alert('Product link copied.');" +
-    "}).catch(function(){" +
-    "prompt('Copy this link:',value);" +
-    "});" +
-
-    "}else{" +
-    "prompt('Copy this link:',value);" +
-    "}" +
-
+    "}).catch(function(){prompt('Copy this link:',value);});" +
+    "}else{prompt('Copy this link:',value);}" +
     "}" +
 
     "function copyProductLink(id){" +
@@ -882,28 +881,21 @@ async function publicPage(env) {
     "}" +
 
     "function shareProduct(id){" +
-
     "var p=PRODUCTS.find(function(x){return String(x.id)===String(id);});" +
     "var link=productLink(id);" +
 
     "if(navigator.share){" +
-
     "navigator.share({" +
     "title:p?p.name:'AOP Product'," +
     "text:'Check this product from ALANG ORIGINAL PRODUCTS'," +
     "url:link" +
     "}).catch(function(){});" +
-
     "}else{" +
-
     "copyText(link);" +
-
     "}" +
-
     "}" +
 
     "function whatsappProduct(id){" +
-
     "var p=PRODUCTS.find(function(x){return String(x.id)===String(id);});" +
 
     "if(!WHATSAPP_NUMBER){" +
@@ -918,13 +910,11 @@ async function publicPage(env) {
     "productLink(id);" +
 
     "location.href='https://wa.me/'+WHATSAPP_NUMBER+'?text='+encodeURIComponent(message);" +
-
     "}" +
 
     "function makeGallery(images,modal){" +
 
     "var wrap=document.createElement('div');" +
-
     "wrap.className=modal?'card-gallery modal-gallery':'card-gallery';" +
 
     "var track=document.createElement('div');" +
@@ -949,11 +939,9 @@ async function publicPage(env) {
     "track.appendChild(slide);" +
 
     "if(list.length>1){" +
-
     "var dot=document.createElement('span');" +
     "dot.className='dot'+(index===0?' active':'');" +
     "dots.appendChild(dot);" +
-
     "}" +
 
     "});" +
@@ -972,7 +960,6 @@ async function publicPage(env) {
     "});" +
 
     "});" +
-
     "}" +
 
     "wrap.appendChild(track);" +
@@ -980,7 +967,6 @@ async function publicPage(env) {
     "if(list.length>1)wrap.appendChild(dots);" +
 
     "return wrap;" +
-
     "}" +
 
     "function createCard(p){" +
@@ -989,12 +975,10 @@ async function publicPage(env) {
     "card.className='card';" +
 
     "if(Number(p.featured)===1){" +
-
     "var badge=document.createElement('div');" +
     "badge.className='featured-badge';" +
     "badge.textContent='⭐ FEATURED';" +
     "card.appendChild(badge);" +
-
     "}" +
 
     "card.appendChild(makeGallery(p.images,false));" +
@@ -1053,7 +1037,6 @@ async function publicPage(env) {
     "card.appendChild(content);" +
 
     "return card;" +
-
     "}" +
 
     "function renderProducts(){" +
@@ -1064,11 +1047,9 @@ async function publicPage(env) {
     "var filtered=PRODUCTS.filter(function(p){" +
 
     "var matchText=!q||[p.name,p.category,p.description,p.price].join(' ').toLowerCase().indexOf(q)!==-1;" +
-
     "var matchCat=!cat||p.category===cat;" +
 
     "return matchText&&matchCat;" +
-
     "});" +
 
     "var featured=filtered.filter(function(p){return Number(p.featured)===1;});" +
@@ -1087,13 +1068,11 @@ async function publicPage(env) {
 
     "fs.style.display=featured.length?'block':'none';" +
     "empty.style.display=filtered.length?'none':'block';" +
-
     "}" +
 
     "function showProduct(id){" +
 
     "var p=PRODUCTS.find(function(x){return String(x.id)===String(id);});" +
-
     "if(!p)return;" +
 
     "var box=document.getElementById('modalContent');" +
@@ -1155,7 +1134,6 @@ async function publicPage(env) {
     "document.getElementById('productModal').classList.add('show');" +
 
     "history.replaceState(null,'',productLink(p.id));" +
-
     "}" +
 
     "function closeProduct(){" +
@@ -1233,7 +1211,7 @@ async function adminPage(env, editId) {
 
     '<div class="topbar">' +
 
-    '<div>' +
+    "<div>" +
     '<h1 style="margin:0">AOP Admin Panel</h1>' +
     '<div style="color:#888">Manage catalogue products</div>' +
     "</div>" +
@@ -1319,31 +1297,26 @@ async function adminPage(env, editId) {
     "<h3>Product Images</h3>" +
 
     '<label class="label">Image 1</label>' +
-
     '<input class="input imageInput" id="image1" value="' +
     enc(images[0] || "") +
     '">' +
 
     '<label class="label">Image 2</label>' +
-
     '<input class="input imageInput" id="image2" value="' +
     enc(images[1] || "") +
     '">' +
 
     '<label class="label">Image 3</label>' +
-
     '<input class="input imageInput" id="image3" value="' +
     enc(images[2] || "") +
     '">' +
 
     '<label class="label">Image 4</label>' +
-
     '<input class="input imageInput" id="image4" value="' +
     enc(images[3] || "") +
     '">' +
 
     '<label class="label">Image 5</label>' +
-
     '<input class="input imageInput" id="image5" value="' +
     enc(images[4] || "") +
     '">' +
@@ -1404,7 +1377,6 @@ async function adminPage(env, editId) {
     "document.getElementById('msg').textContent='New product ready.';" +
 
     "window.scrollTo({top:0,behavior:'smooth'});" +
-
     "}" +
 
     "function editP(id){" +
@@ -1430,10 +1402,8 @@ async function adminPage(env, editId) {
     "data.images.push(document.getElementById('image'+i).value);" +
 
     "if(!data.name.trim()){" +
-
     "alert('Product name is required.');" +
     "return;" +
-
     "}" +
 
     "var res=await fetch('/admin/api/save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(data)});" +
@@ -1441,17 +1411,11 @@ async function adminPage(env, editId) {
     "var out=await res.json();" +
 
     "if(out.ok){" +
-
     "document.getElementById('msg').textContent='Product saved successfully.';" +
-
     "setTimeout(function(){location.href='/admin';},500);" +
-
     "}else{" +
-
     "document.getElementById('msg').textContent=out.error||'Save failed.';" +
-
     "}" +
-
     "}" +
 
     "async function delP(id){" +
@@ -1463,9 +1427,7 @@ async function adminPage(env, editId) {
     "var out=await res.json();" +
 
     "if(out.ok)location.href='/admin';" +
-
     "else alert(out.error||'Delete failed.');" +
-
     "}" +
 
     "function renderList(){" +
@@ -1474,10 +1436,8 @@ async function adminPage(env, editId) {
     "el.innerHTML='';" +
 
     "if(!PRODUCTS.length){" +
-
     "el.innerHTML='<div style=\"color:#888\">No products yet.</div>';" +
     "return;" +
-
     "}" +
 
     "PRODUCTS.forEach(function(p){" +
@@ -1509,9 +1469,7 @@ async function adminPage(env, editId) {
     "item.appendChild(acts);" +
 
     "el.appendChild(item);" +
-
     "});" +
-
     "}" +
 
     "window.newP=newP;" +
@@ -1528,9 +1486,7 @@ async function adminPage(env, editId) {
 
 export default {
   async fetch(request, env) {
-
     try {
-
       const url = new URL(request.url);
       const path = url.pathname;
       const method = request.method;
@@ -1544,7 +1500,6 @@ export default {
       }
 
       if (path === "/admin" && method === "GET") {
-
         if (!(await auth(request, env))) {
           return login(false);
         }
@@ -1554,28 +1509,30 @@ export default {
         return await adminPage(env, editId);
       }
 
-      if (path === "/admin/login" && method === "POST") {
+      /* ================= LOGIN ================= */
 
+      if (path === "/admin/login" && method === "POST") {
         const form = await request.formData();
 
-        const password = String(
+        const enteredPassword = String(
           form.get("password") || ""
-        );
+        ).trim();
+
+        const savedPassword = String(
+          env.ADMIN_PASSWORD || ""
+        ).trim();
 
         if (
-          !env.ADMIN_PASSWORD ||
-          password !== env.ADMIN_PASSWORD
+          !savedPassword ||
+          enteredPassword !== savedPassword
         ) {
           return login(true);
         }
 
-        const token = await session(
-          env.ADMIN_PASSWORD
-        );
+        const token = await session(savedPassword);
 
         return new Response(null, {
-          status: 302,
-
+          status: 303,
           headers: {
             Location: "/admin",
             "Set-Cookie": ck(token)
@@ -1583,29 +1540,31 @@ export default {
         });
       }
 
+      /* ================= LOGOUT ================= */
+
       if (path === "/admin/logout" && method === "POST") {
-
         return new Response(null, {
-          status: 302,
-
+          status: 303,
           headers: {
             Location: "/",
-
             "Set-Cookie":
               COOKIE +
-              "=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0"
+              "=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0"
           }
         });
       }
+
+      /* ================= SAVE PRODUCT ================= */
 
       if (
         path === "/admin/api/save" &&
         method === "POST"
       ) {
-
         if (!(await auth(request, env))) {
           return json(
-            { error: "Unauthorized" },
+            {
+              error: "Unauthorized"
+            },
             401
           );
         }
@@ -1667,7 +1626,6 @@ export default {
         ).trim();
 
         if (!name) {
-
           return json(
             {
               error:
@@ -1678,7 +1636,6 @@ export default {
         }
 
         if (id) {
-
           await env.DB.prepare(
             "UPDATE products SET name=?, category=?, description=?, price=?, stock=?, featured=?, image1=?, image2=?, image3=?, image4=?, image5=? WHERE id=?"
           )
@@ -1697,9 +1654,7 @@ export default {
               id
             )
             .run();
-
         } else {
-
           await env.DB.prepare(
             "INSERT INTO products (name,category,description,price,stock,featured,image1,image2,image3,image4,image5) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
           )
@@ -1719,17 +1674,22 @@ export default {
             .run();
         }
 
-        return json({ ok: true });
+        return json({
+          ok: true
+        });
       }
+
+      /* ================= DELETE PRODUCT ================= */
 
       if (
         path === "/admin/api/delete" &&
         method === "POST"
       ) {
-
         if (!(await auth(request, env))) {
           return json(
-            { error: "Unauthorized" },
+            {
+              error: "Unauthorized"
+            },
             401
           );
         }
@@ -1754,7 +1714,9 @@ export default {
           .bind(id)
           .run();
 
-        return json({ ok: true });
+        return json({
+          ok: true
+        });
       }
 
       return new Response(
@@ -1765,7 +1727,6 @@ export default {
       );
 
     } catch (error) {
-
       return new Response(
         "Server Error: " +
           (
