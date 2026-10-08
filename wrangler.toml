@@ -1,3 +1,8 @@
 name = "alang-original-product-catalog"
 main = "src/index.js"
-compatibility_date = "2026-10-07"
+compatibility_date = "2026-10-08"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "aop-catalog-db"
+database_id = "abf8b907-50cb-4f69-85dc-56277a70b6f8"
