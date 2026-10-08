@@ -46,9 +46,17 @@ function redir(x,h={}){
 
 function enc(b){
   let s="";
-  for(let i=0;i<b.length;i+=32768){
-    s+=String.fromCharCode(...b.subarray(i,i+32768));
+
+  for(
+    let i=0;
+    i<b.length;
+    i+=32768
+  ){
+    s+=String.fromCharCode(
+      ...b.subarray(i,i+32768)
+    );
   }
+
   return btoa(s)
     .replace(/\+/g,"-")
     .replace(/\//g,"_")
@@ -56,22 +64,36 @@ function enc(b){
 }
 
 function dec(s){
-  s=s.replace(/-/g,"+").replace(/_/g,"/");
-  s+="=".repeat((4-s.length%4)%4);
+
+  s=s
+    .replace(/-/g,"+")
+    .replace(/_/g,"/");
+
+  s+="=".repeat(
+    (4-s.length%4)%4
+  );
 
   return new TextDecoder().decode(
-    Uint8Array.from(atob(s),c=>c.charCodeAt(0))
+    Uint8Array.from(
+      atob(s),
+      c=>c.charCodeAt(0)
+    )
   );
 }
 
 async function sig(secret,p){
-  const k=await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(secret),
-    {name:"HMAC",hash:"SHA-256"},
-    false,
-    ["sign"]
-  );
+
+  const k=
+    await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(secret),
+      {
+        name:"HMAC",
+        hash:"SHA-256"
+      },
+      false,
+      ["sign"]
+    );
 
   return enc(
     new Uint8Array(
@@ -85,10 +107,14 @@ async function sig(secret,p){
 }
 
 async function session(secret){
-  const n=new Uint8Array(18);
+
+  const n=
+    new Uint8Array(18);
+
   crypto.getRandomValues(n);
 
-  const p=Date.now()+"."+enc(n);
+  const p=
+    Date.now()+"."+enc(n);
 
   return enc(
     new TextEncoder().encode(
@@ -98,53 +124,84 @@ async function session(secret){
 }
 
 async function auth(r,e){
-  if(!e.ADMIN_PASSWORD)return false;
 
-  const m=(r.headers.get("Cookie")||"")
-    .match(/AOP_ADMIN_SESSION=([^;]+)/);
+  if(!e.ADMIN_PASSWORD){
+    return false;
+  }
 
-  if(!m)return false;
+  const m=
+    (r.headers.get("Cookie")||"")
+      .match(
+        /AOP_ADMIN_SESSION=([^;]+)/
+      );
+
+  if(!m){
+    return false;
+  }
 
   try{
-    const d=dec(m[1]);
-    const i=d.lastIndexOf(".");
-    const p=d.slice(0,i);
-    const t=+p.split(".")[0];
 
-    return Date.now()-t>=0 &&
+    const d=dec(m[1]);
+
+    const i=d.lastIndexOf(".");
+
+    const p=d.slice(0,i);
+
+    const t=
+      +p.split(".")[0];
+
+    return(
+      Date.now()-t>=0 &&
       Date.now()-t<=MAX_AGE &&
-      d.slice(i+1)===await sig(e.ADMIN_PASSWORD,p);
+      d.slice(i+1)===
+      await sig(
+        e.ADMIN_PASSWORD,
+        p
+      )
+    );
+
   }catch{
+
     return false;
+
   }
 }
 
 function ck(v){
+
   return COOKIE+"="+v+
     "; Path=/admin; Max-Age=86400; HttpOnly; Secure; SameSite=Strict";
 }
 
 async function getProducts(e){
 
-  const r=await e.DB.prepare(
-    "SELECT id,name,category,description,price,stock,featured,image1,image2,image3,image4,image5 FROM products ORDER BY featured DESC,id DESC"
-  ).run();
+  const r=
+    await e.DB.prepare(
+      "SELECT id,name,category,description,price,stock,featured,image1,image2,image3,image4,image5 FROM products ORDER BY featured DESC,id DESC"
+    ).run();
 
-  return (r.results||[]).map(x=>({
+  return(
+    r.results||[]
+  ).map(x=>({
 
     id:x.id,
 
     name:x.name||"",
 
-    category:x.category||"Industrial",
+    category:
+      x.category||"Industrial",
 
-    description:x.description||"",
+    description:
+      x.description||"",
 
-    price:x.price||"Price on Request",
+    price:
+      x.price||"Price on Request",
 
-    stock:x.stock||"In Stock",
+    stock:
+      x.stock||"In Stock",
 
-    featured:Number(x.featured)===1,
+    featured:
+      Number(x.featured)===1,
 
     images:[
       x.image1,
@@ -158,6 +215,7 @@ async function getProducts(e){
 }
 
 const CSS=`
+
 *{
 box-sizing:border-box
 }
@@ -169,7 +227,10 @@ color:#f5f7f9;
 font-family:Arial,sans-serif
 }
 
-button,input,select,textarea{
+button,
+input,
+select,
+textarea{
 font:inherit
 }
 
@@ -211,12 +272,15 @@ animation:m 14s linear infinite
 }
 
 @keyframes m{
+
 from{
 transform:translateX(100%)
 }
+
 to{
 transform:translateX(-100%)
 }
+
 }
 
 main{
@@ -250,7 +314,8 @@ color:white
 
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+grid-template-columns:
+repeat(auto-fit,minmax(250px,1fr));
 gap:16px
 }
 
@@ -418,18 +483,36 @@ grid-template-columns:1fr
 }
 `;
 
+
+/* =========================
+   HTML SHELL
+========================= */
+
 function shell(body,title){
 
-return `<!doctype html>
+  return `<!doctype html>
 <html>
 <head>
+
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1"
+>
+
 <title>${title}</title>
-<style>${CSS}</style>
+
+<style>
+${CSS}
+</style>
+
 </head>
+
 <body>
+
 ${body}
+
 </body>
 </html>`;
 
@@ -442,12 +525,16 @@ ${body}
 
 async function publicPage(e){
 
-  const products=await getProducts(e);
+  const products=
+    await getProducts(e);
+
 
   const categories=[
     ...new Set(
       products
-        .map(x=>x.category)
+        .map(function(x){
+          return x.category;
+        })
         .filter(Boolean)
     )
   ].sort();
@@ -465,104 +552,130 @@ async function publicPage(e){
   }
 
 
-  const cards=products.length
-  ?
-
-  products.map(p=>`
-
-  <article class="card">
-
-    <div class="pic">
-
-      ${
-        p.images&&p.images[0]
-
-        ?
-
-        `<img
-          src="${esc(p.images[0])}"
-          alt="${esc(p.name)}"
-        >`
-
-        :
-
-        `AOP PRODUCT`
-
-      }
-
-    </div>
+  let initialCards="";
 
 
-    <div class="content">
+  products.forEach(
+    function(p){
 
-      ${
-        p.featured
+      initialCards+=
 
-        ?
+        "<article class='card'>"+
 
-        `<div class="featured">
-          ★ FEATURED
-        </div>`
+          "<div class='pic'>"+
 
-        :
+            (
+              p.images &&
+              p.images[0]
 
-        ``
-      }
+              ?
 
+              "<img src='"+
+              esc(p.images[0])+
+              "' alt='"+
+              esc(p.name)+
+              "'>"
 
-      <h3>
-        ${esc(p.name)}
-      </h3>
+              :
 
+              "AOP PRODUCT"
+            )+
 
-      <div class="muted">
-        ${esc(p.category)}
-      </div>
-
-
-      <p class="muted">
-        ${esc(p.description)}
-      </p>
+          "</div>"+
 
 
-      <div class="price">
-        ${esc(p.price)}
-      </div>
+          "<div class='content'>"+
+
+            (
+              p.featured
+
+              ?
+
+              "<div class='featured'>"+
+              "★ FEATURED"+
+              "</div>"
+
+              :
+
+              ""
+            )+
+
+            "<h3>"+
+            esc(p.name)+
+            "</h3>"+
+
+            "<div class='muted'>"+
+            esc(p.category)+
+            "</div>"+
+
+            "<p class='muted'>"+
+            esc(p.description)+
+            "</p>"+
+
+            "<div class='price'>"+
+            esc(p.price)+
+            "</div>"+
+
+            "<button "+
+            "class='btn' "+
+            "onclick='showProduct("+
+            Number(p.id)+
+            ")'>"+
+            "VIEW PRODUCT"+
+            "</button>"+
+
+          "</div>"+
+
+        "</article>";
+
+    }
+  );
 
 
-      <button
-        class="btn"
-        onclick="showProduct(${Number(p.id)})"
-      >
-        VIEW PRODUCT
-      </button>
+  if(!initialCards){
 
-    </div>
+    initialCards=
+      "<div class='muted'>"+
+      "No products found."+
+      "</div>";
 
-  </article>
-
-  `).join("")
-
-  :
-
-  `<div class="muted">
-    No products found.
-  </div>`;
+  }
 
 
-  const categoryOptions=categories.map(x=>`
-
-    <option value="${esc(x)}">
-      ${esc(x)}
-    </option>
-
-  `).join("");
+  let categoryOptions="";
 
 
-  const productData=JSON.stringify(products)
-    .replace(/</g,"\\u003c")
-    .replace(/>/g,"\\u003e")
-    .replace(/&/g,"\\u0026");
+  categories.forEach(
+    function(x){
+
+      categoryOptions+=
+
+        "<option value='"+
+        esc(x)+
+        "'>"+
+
+        esc(x)+
+
+        "</option>";
+
+    }
+  );
+
+
+  const productData=
+    JSON.stringify(products)
+      .replace(
+        /</g,
+        "\\u003c"
+      )
+      .replace(
+        />/g,
+        "\\u003e"
+      )
+      .replace(
+        /&/g,
+        "\\u0026"
+      );
 
 
   return shell(`
@@ -576,14 +689,22 @@ alt="AOP Logo"
 >
 
 <div class="brand">
+
 ALANG ORIGINAL PRODUCTS
-<span class="red">AOP</span>
+
+<span class="red">
+AOP
+</span>
+
 </div>
 
+
 <div class="tag">
+
 <b>
 ALL ORIGINAL ALANG PRODUCTS WILL BE AVAILABLE HERE.
 </b>
+
 </div>
 
 </header>
@@ -591,21 +712,32 @@ ALL ORIGINAL ALANG PRODUCTS WILL BE AVAILABLE HERE.
 
 <main>
 
+
 <section class="intro">
 
 <div class="red">
 ALANG INDUSTRIAL MARKET
 </div>
 
+
 <h1>
+
 ORIGINAL
-<span class="red">ALANG</span>
+
+<span class="red">
+ALANG
+</span>
+
 PRODUCTS
+
 </h1>
 
+
 <p>
+
 Discover original industrial products from Alang, Gujarat.
 Explore products, availability and direct inquiries.
+
 </p>
 
 </section>
@@ -613,10 +745,12 @@ Explore products, availability and direct inquiries.
 
 <div class="controls">
 
+
 <input
 id="q"
 placeholder="Search products..."
 >
+
 
 <select id="c">
 
@@ -628,6 +762,7 @@ ${categoryOptions}
 
 </select>
 
+
 </div>
 
 
@@ -635,8 +770,13 @@ ${categoryOptions}
 id="count"
 class="muted"
 >
+
 ${products.length}
-${products.length===1?"Product":"Products"}
+
+${products.length===1
+?"Product"
+:"Products"}
+
 </div>
 
 
@@ -645,9 +785,10 @@ id="g"
 class="grid"
 >
 
-${cards}
+${initialCards}
 
 </div>
+
 
 </main>
 
@@ -655,6 +796,7 @@ ${cards}
 <footer>
 
 ALANG ORIGINAL PRODUCTS (AOP)
+
 <br>
 
 Original industrial products from Alang, Gujarat.
@@ -685,40 +827,69 @@ const WHATSAPP="${WHATSAPP_NUMBER}";
 
 function showProduct(id){
 
-  const p=PRODUCTS.find(
-    x=>Number(x.id)===Number(id)
-  );
+  const p=
+    PRODUCTS.find(
+      function(x){
+
+        return(
+          Number(x.id)===
+          Number(id)
+        );
+
+      }
+    );
+
 
   if(!p){
     return;
   }
 
 
-  const mo=document.getElementById("mo");
+  const mo=
+    document.getElementById(
+      "mo"
+    );
 
-  const mb=document.getElementById("mb");
+
+  const mb=
+    document.getElementById(
+      "mb"
+    );
 
 
   mb.innerHTML="";
 
 
-  const close=document.createElement("button");
-
-  close.className="btn redbtn";
-
-  close.textContent="CLOSE";
-
-  close.onclick=function(){
-
-    mo.classList.remove("on");
-
-    history.replaceState(
-      null,
-      "",
-      location.pathname
+  const close=
+    document.createElement(
+      "button"
     );
 
-  };
+
+  close.className=
+    "btn redbtn";
+
+
+  close.textContent=
+    "CLOSE";
+
+
+  close.onclick=
+    function(){
+
+      mo.classList.remove(
+        "on"
+      );
+
+
+      history.replaceState(
+        null,
+        "",
+        location.pathname
+      );
+
+    };
+
 
   mb.appendChild(close);
 
@@ -728,64 +899,116 @@ function showProduct(id){
     p.images.length
   ){
 
-    const img=document.createElement("img");
+    const img=
+      document.createElement(
+        "img"
+      );
 
-    img.src=p.images[0];
 
-    img.alt=p.name;
+    img.src=
+      p.images[0];
 
-    img.style.width="100%";
 
-    img.style.maxHeight="430px";
+    img.alt=
+      p.name;
 
-    img.style.objectFit="contain";
 
-    img.style.marginTop="15px";
+    img.style.width=
+      "100%";
+
+
+    img.style.maxHeight=
+      "430px";
+
+
+    img.style.objectFit=
+      "contain";
+
+
+    img.style.marginTop=
+      "15px";
+
 
     mb.appendChild(img);
 
   }
 
 
-  const title=document.createElement("h2");
+  const title=
+    document.createElement(
+      "h2"
+    );
 
-  title.textContent=p.name;
+
+  title.textContent=
+    p.name;
+
 
   mb.appendChild(title);
 
 
-  const category=document.createElement("div");
+  const category=
+    document.createElement(
+      "div"
+    );
 
-  category.className="muted";
 
-  category.textContent=p.category;
+  category.className=
+    "muted";
+
+
+  category.textContent=
+    p.category;
+
 
   mb.appendChild(category);
 
 
-  const description=document.createElement("p");
+  const description=
+    document.createElement(
+      "p"
+    );
 
-  description.textContent=p.description;
+
+  description.textContent=
+    p.description;
+
 
   mb.appendChild(description);
 
 
-  const price=document.createElement("div");
+  const price=
+    document.createElement(
+      "div"
+    );
 
-  price.className="price";
 
-  price.textContent=p.price;
+  price.className=
+    "price";
+
+
+  price.textContent=
+    p.price;
+
 
   mb.appendChild(price);
 
 
   if(WHATSAPP){
 
-    const wa=document.createElement("a");
+    const wa=
+      document.createElement(
+        "a"
+      );
 
-    wa.className="btn wa";
 
-    wa.target="_blank";
+    wa.className=
+      "btn wa";
+
+
+    wa.target=
+      "_blank";
+
 
     wa.href=
       "https://wa.me/"+
@@ -801,14 +1024,19 @@ function showProduct(id){
         p.id
       );
 
-    wa.textContent="WHATSAPP INQUIRY";
+
+    wa.textContent=
+      "WHATSAPP INQUIRY";
+
 
     mb.appendChild(wa);
 
   }
 
 
-  mo.classList.add("on");
+  mo.classList.add(
+    "on"
+  );
 
 
   history.replaceState(
@@ -824,41 +1052,55 @@ function renderProducts(){
 
   const search=
     (
-      document.getElementById("q").value||""
+      document
+        .getElementById("q")
+        .value||""
     )
     .toLowerCase()
     .trim();
 
 
   const category=
-    document.getElementById("c").value;
+    document
+      .getElementById("c")
+      .value;
 
 
-  const list=PRODUCTS.filter(
-    function(p){
+  const list=
+    PRODUCTS.filter(
+      function(p){
 
-      const text=
-        (
-          p.name+
-          " "+
-          p.category+
-          " "+
-          p.description
-        )
-        .toLowerCase();
+        const text=
+          (
+            p.name+
+            " "+
+            p.category+
+            " "+
+            p.description
+          )
+          .toLowerCase();
 
 
-      return(
-        (!search || text.includes(search)) &&
-        (!category || p.category===category)
-      );
+        return(
 
-    }
-  );
+          (!search ||
+           text.includes(search))
+
+          &&
+
+          (!category ||
+           p.category===category)
+
+        );
+
+      }
+    );
 
 
   const count=
-    document.getElementById("count");
+    document.getElementById(
+      "count"
+    );
 
 
   count.textContent=
@@ -873,7 +1115,9 @@ function renderProducts(){
 
 
   const grid=
-    document.getElementById("g");
+    document.getElementById(
+      "g"
+    );
 
 
   grid.innerHTML="";
@@ -882,9 +1126,9 @@ function renderProducts(){
   if(!list.length){
 
     grid.innerHTML=
-      `<div class="muted">
-        No products found.
-      </div>`;
+      "<div class='muted'>"+
+      "No products found."+
+      "</div>";
 
     return;
 
@@ -895,15 +1139,23 @@ function renderProducts(){
     function(p){
 
       const article=
-        document.createElement("article");
+        document.createElement(
+          "article"
+        );
 
-      article.className="card";
+
+      article.className=
+        "card";
 
 
       const pic=
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
-      pic.className="pic";
+
+      pic.className=
+        "pic";
 
 
       if(
@@ -912,11 +1164,18 @@ function renderProducts(){
       ){
 
         const img=
-          document.createElement("img");
+          document.createElement(
+            "img"
+          );
 
-        img.src=p.images[0];
 
-        img.alt=p.name;
+        img.src=
+          p.images[0];
+
+
+        img.alt=
+          p.name;
+
 
         pic.appendChild(img);
 
@@ -928,25 +1187,36 @@ function renderProducts(){
       }
 
 
-      article.appendChild(pic);
+      article.appendChild(
+        pic
+      );
 
 
       const content=
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
-      content.className="content";
+
+      content.className=
+        "content";
 
 
       if(p.featured){
 
         const featured=
-          document.createElement("div");
+          document.createElement(
+            "div"
+          );
+
 
         featured.className=
           "featured";
 
+
         featured.textContent=
           "★ FEATURED";
+
 
         content.appendChild(
           featured
@@ -956,66 +1226,118 @@ function renderProducts(){
 
 
       const h=
-        document.createElement("h3");
+        document.createElement(
+          "h3"
+        );
 
-      h.textContent=p.name;
 
-      content.appendChild(h);
+      h.textContent=
+        p.name;
+
+
+      content.appendChild(
+        h
+      );
 
 
       const cat=
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
-      cat.className="muted";
 
-      cat.textContent=p.category;
+      cat.className=
+        "muted";
 
-      content.appendChild(cat);
+
+      cat.textContent=
+        p.category;
+
+
+      content.appendChild(
+        cat
+      );
 
 
       const desc=
-        document.createElement("p");
+        document.createElement(
+          "p"
+        );
 
-      desc.className="muted";
+
+      desc.className=
+        "muted";
+
 
       desc.textContent=
         p.description;
 
-      content.appendChild(desc);
+
+      content.appendChild(
+        desc
+      );
 
 
       const price=
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
-      price.className="price";
 
-      price.textContent=p.price;
+      price.className=
+        "price";
 
-      content.appendChild(price);
+
+      price.textContent=
+        p.price;
+
+
+      content.appendChild(
+        price
+      );
 
 
       const button=
-        document.createElement("button");
+        document.createElement(
+          "button"
+        );
 
-      button.type="button";
 
-      button.className="btn";
+      button.type=
+        "button";
+
+
+      button.className=
+        "btn";
+
 
       button.textContent=
         "VIEW PRODUCT";
 
-      button.onclick=function(){
 
-        showProduct(p.id);
+      button.onclick=
+        function(){
 
-      };
+          showProduct(
+            p.id
+          );
 
-      content.appendChild(button);
+        };
 
 
-      article.appendChild(content);
+      content.appendChild(
+        button
+      );
 
-      grid.appendChild(article);
+
+      article.appendChild(
+        content
+      );
+
+
+      grid.appendChild(
+        article
+      );
 
     }
   );
@@ -1047,7 +1369,9 @@ const productId=
 
 if(productId){
 
-  showProduct(productId);
+  showProduct(
+    productId
+  );
 
 }
 
@@ -1055,6 +1379,7 @@ if(productId){
 
 
 </body>
+
 </html>
 
 `,
@@ -1069,29 +1394,40 @@ if(productId){
 
 function login(invalid=false){
 
-return shell(`
+  return shell(`
 
-<main style="max-width:430px;margin:60px auto">
+<main
+style="max-width:430px;margin:60px auto"
+>
 
 <div class="box">
+
 
 <img
 class="logo"
 src="${LOGO_SOURCE}"
 >
 
+
 <h2>
+
 ALANG ORIGINAL PRODUCTS
-<span class="red">AOP</span>
+
+<span class="red">
+AOP
+</span>
+
 </h2>
 
+
 ${
-invalid
-?
-"<p class='red'>Invalid admin password.</p>"
-:
-""
+  invalid
+  ?
+  "<p class='red'>Invalid admin password.</p>"
+  :
+  ""
 }
+
 
 <form
 method="post"
@@ -1099,9 +1435,11 @@ action="/admin/login"
 class="form"
 >
 
+
 <label>
 ADMIN PASSWORD
 </label>
+
 
 <input
 name="password"
@@ -1109,11 +1447,18 @@ type="password"
 required
 >
 
-<button class="btn redbtn">
+
+<button
+class="btn redbtn"
+>
+
 LOGIN TO ADMIN PANEL
+
 </button>
 
+
 </form>
+
 
 </div>
 
@@ -1131,14 +1476,21 @@ LOGIN TO ADMIN PANEL
 
 function adminPage(){
 
-return shell(`
+  return shell(`
 
 <header>
 
+
 <div class="brand">
+
 AOP
-<span class="red">ADMIN PANEL</span>
+
+<span class="red">
+ADMIN PANEL
+</span>
+
 </div>
+
 
 <form
 method="post"
@@ -1151,12 +1503,15 @@ LOGOUT
 
 </form>
 
+
 </header>
 
 
 <main>
 
+
 <div class="two">
+
 
 <button
 id="addProductBtn"
@@ -1164,7 +1519,9 @@ type="button"
 class="btn redbtn"
 onclick="newP()"
 >
+
 + ADD PRODUCT
+
 </button>
 
 
@@ -1172,8 +1529,11 @@ onclick="newP()"
 class="btn"
 href="/"
 >
+
 OPEN CATALOGUE
+
 </a>
+
 
 </div>
 
@@ -1184,6 +1544,7 @@ class="box"
 style="margin:15px 0;display:none"
 >
 
+
 <h2 id="et">
 ADD PRODUCT
 </h2>
@@ -1191,20 +1552,24 @@ ADD PRODUCT
 
 <div class="form">
 
+
 <input
 id="id"
 type="hidden"
 >
+
 
 <input
 id="name"
 placeholder="Product Name"
 >
 
+
 <input
 id="cat"
 placeholder="Category"
 >
+
 
 <textarea
 id="desc"
@@ -1215,10 +1580,12 @@ placeholder="Description"
 
 <div class="two">
 
+
 <input
 id="price"
 placeholder="Price"
 >
+
 
 <select id="stock">
 
@@ -1232,6 +1599,7 @@ Out of Stock
 
 </select>
 
+
 </div>
 
 
@@ -1240,20 +1608,24 @@ id="i1"
 placeholder="Image URL 1"
 >
 
+
 <input
 id="i2"
 placeholder="Image URL 2"
 >
+
 
 <input
 id="i3"
 placeholder="Image URL 3"
 >
 
+
 <input
 id="i4"
 placeholder="Image URL 4"
 >
+
 
 <input
 id="i5"
@@ -1275,25 +1647,34 @@ Featured Product
 
 <div class="two">
 
+
 <button
 type="button"
 class="btn redbtn"
 onclick="saveP()"
 >
+
 SAVE PRODUCT
+
 </button>
+
 
 <button
 type="button"
 class="btn"
 onclick="cancelP()"
 >
+
 CANCEL
+
 </button>
 
-</div>
 
 </div>
+
+
+</div>
+
 
 </section>
 
@@ -1309,6 +1690,7 @@ class="list"
 >
 </div>
 
+
 </main>
 
 
@@ -1317,410 +1699,518 @@ class="list"
 
 function e(x){
 
-return document.getElementById(x);
+  return document.getElementById(
+    x
+  );
 
 }
 
 
 function newP(){
 
-e("editor").style.display="block";
-
-e("et").textContent=
-"ADD PRODUCT";
+  e("editor").style.display=
+    "block";
 
 
-[
-"id",
-"name",
-"cat",
-"desc",
-"price",
-"i1",
-"i2",
-"i3",
-"i4",
-"i5"
-]
-.forEach(
-function(x){
-
-e(x).value="";
-
-});
+  e("et").textContent=
+    "ADD PRODUCT";
 
 
-e("stock").value=
-"In Stock";
+  [
+    "id",
+    "name",
+    "cat",
+    "desc",
+    "price",
+    "i1",
+    "i2",
+    "i3",
+    "i4",
+    "i5"
+  ].forEach(
+    function(x){
 
-e("feat").checked=false;
+      e(x).value="";
+
+    }
+  );
 
 
-window.scrollTo({
+  e("stock").value=
+    "In Stock";
 
-top:
-e("editor").offsetTop-20,
 
-behavior:"smooth"
+  e("feat").checked=
+    false;
 
-});
+
+  window.scrollTo({
+
+    top:
+      e("editor").offsetTop-20,
+
+    behavior:
+      "smooth"
+
+  });
 
 }
 
 
 function editP(p){
 
-newP();
-
-e("et").textContent=
-"EDIT PRODUCT";
-
-e("id").value=p.id;
-
-e("name").value=p.name;
-
-e("cat").value=p.category;
-
-e("desc").value=p.description;
-
-e("price").value=p.price;
-
-e("stock").value=p.stock;
-
-e("feat").checked=p.featured;
+  newP();
 
 
-(p.images||[]).forEach(
-function(x,i){
+  e("et").textContent=
+    "EDIT PRODUCT";
 
-if(i<5){
 
-e("i"+(i+1)).value=x;
+  e("id").value=
+    p.id;
 
-}
 
-});
+  e("name").value=
+    p.name;
+
+
+  e("cat").value=
+    p.category;
+
+
+  e("desc").value=
+    p.description;
+
+
+  e("price").value=
+    p.price;
+
+
+  e("stock").value=
+    p.stock;
+
+
+  e("feat").checked=
+    p.featured;
+
+
+  (
+    p.images||[]
+  ).forEach(
+    function(x,i){
+
+      if(i<5){
+
+        e(
+          "i"+(i+1)
+        ).value=x;
+
+      }
+
+    }
+  );
 
 }
 
 
 function cancelP(){
 
-e("editor").style.display=
-"none";
+  e("editor").style.display=
+    "none";
 
 }
 
 
 async function saveP(){
 
-const p={
+  const p={
 
-id:e("id").value,
+    id:
+      e("id").value,
 
-name:e("name").value.trim(),
+    name:
+      e("name").value.trim(),
 
-category:e("cat").value.trim(),
+    category:
+      e("cat").value.trim(),
 
-description:e("desc").value.trim(),
+    description:
+      e("desc").value.trim(),
 
-price:e("price").value.trim(),
+    price:
+      e("price").value.trim(),
 
-stock:e("stock").value,
+    stock:
+      e("stock").value,
 
-featured:e("feat").checked,
+    featured:
+      e("feat").checked,
 
-images:[
-1,2,3,4,5
-]
-.map(
-function(i){
+    images:
+      [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+      .map(
+        function(i){
 
-return e(
-"i"+i
-)
-.value
-.trim();
+          return e(
+            "i"+i
+          )
+          .value
+          .trim();
 
-}
-)
-.filter(Boolean)
+        }
+      )
+      .filter(Boolean)
 
-};
-
-
-if(!p.name){
-
-alert(
-"Product Name is required"
-);
-
-return;
-
-}
-
-
-try{
-
-const r=await fetch(
-"/admin/api/save",
-{
-method:"POST",
-headers:{
-"Content-Type":
-"application/json"
-},
-body:JSON.stringify(p)
-}
-);
+  };
 
 
-if(r.ok){
+  if(!p.name){
 
-alert(
-"Product saved successfully."
-);
+    alert(
+      "Product Name is required"
+    );
 
-location.reload();
+    return;
 
-}else{
+  }
 
-alert(
-"Save failed."
-);
 
-}
+  try{
 
-}catch(err){
+    const r=
+      await fetch(
+        "/admin/api/save",
+        {
+          method:"POST",
 
-alert(
-"Network error. Please try again."
-);
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
 
-}
+          body:
+            JSON.stringify(p)
+        }
+      );
+
+
+    if(r.ok){
+
+      alert(
+        "Product saved successfully."
+      );
+
+      location.reload();
+
+    }else{
+
+      alert(
+        "Save failed."
+      );
+
+    }
+
+  }catch(err){
+
+    alert(
+      "Network error. Please try again."
+    );
+
+  }
 
 }
 
 
 async function delP(id){
 
-if(
-!confirm(
-"Delete this product?"
-)
-){
+  if(
+    !confirm(
+      "Delete this product?"
+    )
+  ){
 
-return;
+    return;
+
+  }
+
+
+  try{
+
+    const r=
+      await fetch(
+        "/admin/api/delete",
+        {
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              id:id
+            })
+        }
+      );
+
+
+    if(r.ok){
+
+      location.reload();
+
+    }else{
+
+      alert(
+        "Delete failed."
+      );
+
+    }
+
+  }catch(err){
+
+    alert(
+      "Network error."
+    );
+
+  }
 
 }
 
 
-try{
+window.newP=
+  newP;
 
-const r=await fetch(
-"/admin/api/delete",
-{
-method:"POST",
-headers:{
-"Content-Type":
-"application/json"
-},
-body:JSON.stringify({
-id:id
-})
-}
-);
+window.editP=
+  editP;
 
+window.cancelP=
+  cancelP;
 
-if(r.ok){
+window.saveP=
+  saveP;
 
-location.reload();
-
-}else{
-
-alert(
-"Delete failed."
-);
-
-}
-
-}catch(err){
-
-alert(
-"Network error."
-);
-
-}
-
-}
+window.delP=
+  delP;
 
 
-window.newP=newP;
-window.editP=editP;
-window.cancelP=cancelP;
-window.saveP=saveP;
-window.delP=delP;
-
+/* ADMIN PRODUCT LIST */
 
 (async function(){
 
-try{
+  try{
 
-const response=
-await fetch(
-"/api/products",
-{
-cache:"no-store"
-}
-);
-
-const D=
-await response.json();
+    const response=
+      await fetch(
+        "/api/products",
+        {
+          cache:
+            "no-store"
+        }
+      );
 
 
-const list=
-e("list");
+    const D=
+      await response.json();
 
 
-if(
-!Array.isArray(D) ||
-!D.length
-){
-
-list.innerHTML=
-"<div class='muted'>No products yet. Click + ADD PRODUCT.</div>";
-
-return;
-
-}
+    const list=
+      e("list");
 
 
-list.innerHTML="";
+    if(
+      !Array.isArray(D) ||
+      !D.length
+    ){
+
+      list.innerHTML=
+        "<div class='muted'>"+
+        "No products yet. "+
+        "Click + ADD PRODUCT."+
+        "</div>";
+
+      return;
+
+    }
 
 
-D.forEach(
-function(p){
-
-const item=
-document.createElement(
-"div"
-);
-
-item.className="item";
+    list.innerHTML="";
 
 
-const top=
-document.createElement(
-"div"
-);
+    D.forEach(
+      function(p){
 
-top.className="top";
-
-
-const name=
-document.createElement(
-"b"
-);
-
-name.textContent=
-p.name;
+        const item=
+          document.createElement(
+            "div"
+          );
 
 
-const price=
-document.createElement(
-"span"
-);
-
-price.textContent=
-p.price;
+        item.className=
+          "item";
 
 
-top.appendChild(name);
-
-top.appendChild(price);
-
-item.appendChild(top);
-
-
-const info=
-document.createElement(
-"div"
-);
-
-info.className="muted";
-
-info.textContent=
-p.category+
-" • "+
-p.stock;
-
-item.appendChild(info);
+        const top=
+          document.createElement(
+            "div"
+          );
 
 
-const buttons=
-document.createElement(
-"div"
-);
-
-buttons.className="two";
+        top.className=
+          "top";
 
 
-const edit=
-document.createElement(
-"button"
-);
-
-edit.type="button";
-
-edit.textContent=
-"EDIT";
-
-edit.onclick=
-function(){
-
-editP(p);
-
-};
+        const name=
+          document.createElement(
+            "b"
+          );
 
 
-const del=
-document.createElement(
-"button"
-);
-
-del.type="button";
-
-del.className=
-"redbtn";
-
-del.textContent=
-"DELETE";
-
-del.onclick=
-function(){
-
-delP(p.id);
-
-};
+        name.textContent=
+          p.name;
 
 
-buttons.appendChild(edit);
+        const price=
+          document.createElement(
+            "span"
+          );
 
-buttons.appendChild(del);
 
-item.appendChild(buttons);
+        price.textContent=
+          p.price;
 
 
-list.appendChild(item);
+        top.appendChild(
+          name
+        );
 
-});
 
-}catch(err){
+        top.appendChild(
+          price
+        );
 
-e("list").innerHTML=
-"<div class='muted'>Unable to load products.</div>";
 
-}
+        item.appendChild(
+          top
+        );
+
+
+        const info=
+          document.createElement(
+            "div"
+          );
+
+
+        info.className=
+          "muted";
+
+
+        info.textContent=
+          p.category+
+          " • "+
+          p.stock;
+
+
+        item.appendChild(
+          info
+        );
+
+
+        const buttons=
+          document.createElement(
+            "div"
+          );
+
+
+        buttons.className=
+          "two";
+
+
+        const edit=
+          document.createElement(
+            "button"
+          );
+
+
+        edit.type=
+          "button";
+
+
+        edit.textContent=
+          "EDIT";
+
+
+        edit.onclick=
+          function(){
+
+            editP(p);
+
+          };
+
+
+        const del=
+          document.createElement(
+            "button"
+          );
+
+
+        del.type=
+          "button";
+
+
+        del.className=
+          "redbtn";
+
+
+        del.textContent=
+          "DELETE";
+
+
+        del.onclick=
+          function(){
+
+            delP(p.id);
+
+          };
+
+
+        buttons.appendChild(
+          edit
+        );
+
+
+        buttons.appendChild(
+          del
+        );
+
+
+        item.appendChild(
+          buttons
+        );
+
+
+        list.appendChild(
+          item
+        );
+
+      }
+    );
+
+
+  }catch(err){
+
+    e("list").innerHTML=
+      "<div class='muted'>"+
+      "Unable to load products."+
+      "</div>";
+
+  }
 
 })();
 
@@ -1728,6 +2218,7 @@ e("list").innerHTML=
 
 
 </body>
+
 </html>
 
 `,
@@ -1742,204 +2233,268 @@ e("list").innerHTML=
 
 async function admin(r,e,u){
 
-if(
-u.pathname==="/admin" ||
-u.pathname==="/admin/"
-){
+  if(
+    u.pathname==="/admin" ||
+    u.pathname==="/admin/"
+  ){
 
-if(!(await auth(r,e))){
+    if(
+      !(await auth(r,e))
+    ){
 
-return html(login());
+      return html(
+        login()
+      );
 
-}
-
-return html(adminPage());
-
-}
-
-
-if(
-u.pathname==="/admin/login"
-){
-
-if(r.method!=="POST"){
-
-return redir("/admin");
-
-}
+    }
 
 
-if(!e.ADMIN_PASSWORD){
+    return html(
+      adminPage()
+    );
 
-return html(
-"Admin password is not configured",
-503
-);
-
-}
+  }
 
 
-const f=
-await r.formData();
+  if(
+    u.pathname==="/admin/login"
+  ){
+
+    if(
+      r.method!=="POST"
+    ){
+
+      return redir(
+        "/admin"
+      );
+
+    }
 
 
-if(
-String(
-f.get("password")||""
-)!==
-e.ADMIN_PASSWORD
-){
+    if(
+      !e.ADMIN_PASSWORD
+    ){
 
-return html(
-login(true),
-401
-);
+      return html(
+        "Admin password is not configured",
+        503
+      );
 
-}
+    }
 
 
-return redir(
-"/admin",
-{
-"Set-Cookie":
-ck(
-await session(
-e.ADMIN_PASSWORD
-)
-)
-}
-);
-
-}
+    const f=
+      await r.formData();
 
 
-if(
-u.pathname==="/admin/logout"
-){
+    if(
+      String(
+        f.get("password")||""
+      )!==e.ADMIN_PASSWORD
+    ){
 
-return redir(
-"/admin",
-{
-"Set-Cookie":
-ck("")
-}
-);
+      return html(
+        login(true),
+        401
+      );
 
-}
-
-
-if(!(await auth(r,e))){
-
-return json(
-{
-error:"Unauthorized"
-},
-401
-);
-
-}
+    }
 
 
-if(
-![
-"/admin/api/save",
-"/admin/api/delete"
-]
-.includes(u.pathname) ||
-r.method!=="POST"
-){
+    return redir(
+      "/admin",
+      {
+        "Set-Cookie":
+          ck(
+            await session(
+              e.ADMIN_PASSWORD
+            )
+          )
+      }
+    );
 
-return text(
-"Not Found",
-"text/plain",
-404
-);
-
-}
+  }
 
 
-const x=
-await r.json();
+  if(
+    u.pathname==="/admin/logout"
+  ){
+
+    return redir(
+      "/admin",
+      {
+        "Set-Cookie":
+          ck("")
+      }
+    );
+
+  }
 
 
-if(
-u.pathname.endsWith("/delete")
-){
+  if(
+    !(await auth(r,e))
+  ){
 
-await e.DB.prepare(
-"DELETE FROM products WHERE id=?"
-)
-.bind(x.id)
-.run();
+    return json(
+      {
+        error:
+          "Unauthorized"
+      },
+      401
+    );
 
-return json({
-ok:true
-});
-
-}
+  }
 
 
-if(!x.name){
+  if(
+    ![
+      "/admin/api/save",
+      "/admin/api/delete"
+    ].includes(
+      u.pathname
+    ) ||
+    r.method!=="POST"
+  ){
 
-return json(
-{
-error:"name required"
-},
-400
-);
+    return text(
+      "Not Found",
+      "text/plain",
+      404
+    );
 
-}
-
-
-const im=[
-...(x.images||[]),
-null,
-null,
-null,
-null,
-null
-].slice(0,5);
+  }
 
 
-if(x.id){
-
-await e.DB.prepare(
-"UPDATE products SET name=?,category=?,description=?,price=?,stock=?,featured=?,image1=?,image2=?,image3=?,image4=?,image5=? WHERE id=?"
-)
-.bind(
-x.name,
-x.category||"Industrial",
-x.description||"",
-x.price||"Price on Request",
-x.stock||"In Stock",
-x.featured?1:0,
-...im,
-x.id
-)
-.run();
-
-}else{
-
-await e.DB.prepare(
-"INSERT INTO products(name,category,description,price,stock,featured,image1,image2,image3,image4,image5) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
-)
-.bind(
-x.name,
-x.category||"Industrial",
-x.description||"",
-x.price||"Price on Request",
-x.stock||"In Stock",
-x.featured?1:0,
-...im
-)
-.run();
-
-}
+  const x=
+    await r.json();
 
 
-return json({
-ok:true
-});
+  /* DELETE */
+
+  if(
+    u.pathname.endsWith(
+      "/delete"
+    )
+  ){
+
+    await e.DB.prepare(
+      "DELETE FROM products WHERE id=?"
+    )
+    .bind(
+      x.id
+    )
+    .run();
+
+
+    return json({
+      ok:true
+    });
+
+  }
+
+
+  /* VALIDATION */
+
+  if(!x.name){
+
+    return json(
+      {
+        error:
+          "name required"
+      },
+      400
+    );
+
+  }
+
+
+  const im=[
+    ...(x.images||[]),
+    null,
+    null,
+    null,
+    null,
+    null
+  ].slice(
+    0,
+    5
+  );
+
+
+  /* UPDATE */
+
+  if(x.id){
+
+    await e.DB.prepare(
+      "UPDATE products SET name=?,category=?,description=?,price=?,stock=?,featured=?,image1=?,image2=?,image3=?,image4=?,image5=? WHERE id=?"
+    )
+    .bind(
+
+      x.name,
+
+      x.category||
+        "Industrial",
+
+      x.description||
+        "",
+
+      x.price||
+        "Price on Request",
+
+      x.stock||
+        "In Stock",
+
+      x.featured
+        ?1
+        :0,
+
+      ...im,
+
+      x.id
+
+    )
+    .run();
+
+
+  }else{
+
+
+    /* INSERT */
+
+    await e.DB.prepare(
+      "INSERT INTO products(name,category,description,price,stock,featured,image1,image2,image3,image4,image5) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
+    )
+    .bind(
+
+      x.name,
+
+      x.category||
+        "Industrial",
+
+      x.description||
+        "",
+
+      x.price||
+        "Price on Request",
+
+      x.stock||
+        "In Stock",
+
+      x.featured
+        ?1
+        :0,
+
+      ...im
+
+    )
+    .run();
+
+  }
+
+
+  return json({
+    ok:true
+  });
 
 }
 
@@ -1950,79 +2505,104 @@ ok:true
 
 export default{
 
-async fetch(r,e){
+  async fetch(r,e){
 
-const u=
-new URL(r.url);
-
-
-if(
-u.pathname==="/aop-logo.png"
-){
-
-return fetch(
-LOGO_SOURCE
-);
-
-}
+    const u=
+      new URL(r.url);
 
 
-if(
-u.pathname==="/api/products"
-){
+    /* LOGO */
 
-try{
+    if(
+      u.pathname===
+      "/aop-logo.png"
+    ){
 
-return json(
-await getProducts(e)
-);
+      return fetch(
+        LOGO_SOURCE
+      );
 
-}catch{
-
-return json([]);
-
-}
-
-}
+    }
 
 
-if(
-u.pathname.startsWith("/admin")
-){
+    /* PRODUCTS API */
 
-return admin(r,e,u);
+    if(
+      u.pathname===
+      "/api/products"
+    ){
 
-}
+      try{
+
+        return json(
+          await getProducts(e)
+        );
+
+      }catch{
+
+        return json(
+          []
+        );
+
+      }
+
+    }
 
 
-/* PUBLIC CATALOGUE */
+    /* ADMIN */
 
-try{
+    if(
+      u.pathname.startsWith(
+        "/admin"
+      )
+    ){
 
-return html(
-await publicPage(e)
-);
+      return admin(
+        r,
+        e,
+        u
+      );
 
-}catch(error){
+    }
 
-return html(
-`
-<div style="
-font-family:Arial;
-background:#030507;
-color:white;
-padding:40px;
-text-align:center;
-">
-<h2>ALANG ORIGINAL PRODUCTS</h2>
-<p>Catalogue is temporarily loading.</p>
-</div>
-`,
-500
-);
 
-}
+    /* PUBLIC CATALOGUE */
 
-}
+    try{
+
+      return html(
+        await publicPage(e)
+      );
+
+    }catch(error){
+
+      return html(
+        `
+        <div
+        style="
+        font-family:Arial;
+        background:#030507;
+        color:white;
+        padding:40px;
+        text-align:center;
+        "
+        >
+
+        <h2>
+        ALANG ORIGINAL PRODUCTS
+        </h2>
+
+        <p>
+        Catalogue is temporarily unavailable.
+        </p>
+
+        </div>
+        `,
+        500
+      );
+
+    }
+
+  }
 
 };
