@@ -11,7 +11,7 @@ function html(s,status=200,h={}){
       "Cache-Control":"no-store",
       ...h
     }
-  })
+  });
 }
 
 function text(s,type="text/plain",status=200){
@@ -21,7 +21,7 @@ function text(s,type="text/plain",status=200){
       "Content-Type":type,
       "Cache-Control":"no-store"
     }
-  })
+  });
 }
 
 function json(x,status=200){
@@ -31,7 +31,7 @@ function json(x,status=200){
       "Content-Type":"application/json",
       "Cache-Control":"no-store"
     }
-  })
+  });
 }
 
 function redir(x,h={}){
@@ -41,7 +41,7 @@ function redir(x,h={}){
       Location:x,
       ...h
     }
-  })
+  });
 }
 
 function enc(b){
@@ -52,15 +52,16 @@ function enc(b){
   return btoa(s)
     .replace(/\+/g,"-")
     .replace(/\//g,"_")
-    .replace(/=+$/,"")
+    .replace(/=+$/,"");
 }
 
 function dec(s){
   s=s.replace(/-/g,"+").replace(/_/g,"/");
   s+="=".repeat((4-s.length%4)%4);
+
   return new TextDecoder().decode(
     Uint8Array.from(atob(s),c=>c.charCodeAt(0))
-  )
+  );
 }
 
 async function sig(secret,p){
@@ -80,7 +81,7 @@ async function sig(secret,p){
         new TextEncoder().encode(p)
       )
     )
-  )
+  );
 }
 
 async function session(secret){
@@ -93,7 +94,7 @@ async function session(secret){
     new TextEncoder().encode(
       p+"."+await sig(secret,p)
     )
-  )
+  );
 }
 
 async function auth(r,e){
@@ -143,38 +144,47 @@ async function getProducts(e){
       x.image4,
       x.image5
     ].filter(Boolean)
-  }))
+  }));
 }
 
 const CSS=`
-*{box-sizing:border-box}
+*{
+box-sizing:border-box
+}
+
 body{
 margin:0;
 background:#030507;
 color:#f5f7f9;
 font-family:Arial,sans-serif
 }
+
 button,input,select,textarea{
 font:inherit
 }
+
 header{
 text-align:center;
 padding:25px 15px;
 border-bottom:1px solid #20252a;
 background:#070a0e
 }
+
 .logo{
 width:min(380px,88vw);
 max-height:210px;
 object-fit:contain
 }
+
 .brand{
 font-size:clamp(22px,5vw,44px);
 font-weight:900
 }
+
 .red{
 color:#f22
 }
+
 .tag{
 margin:15px auto 0;
 padding:10px;
@@ -184,30 +194,41 @@ color:#f22;
 font-weight:900;
 white-space:nowrap
 }
+
 .tag b{
 display:inline-block;
 animation:m 14s linear infinite
 }
+
 @keyframes m{
-from{transform:translateX(100%)}
-to{transform:translateX(-100%)}
+from{
+transform:translateX(100%)
 }
+to{
+transform:translateX(-100%)
+}
+}
+
 main{
 width:min(1200px,calc(100% - 28px));
 margin:30px auto 60px
 }
+
 .intro{
 text-align:center
 }
+
 .intro p{
 color:#929da7;
 line-height:1.7
 }
+
 .controls{
 display:flex;
 gap:10px;
 margin:25px 0
 }
+
 .controls>*{
 flex:1;
 padding:14px;
@@ -216,17 +237,20 @@ border-radius:9px;
 background:#0d1218;
 color:white
 }
+
 .grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
 gap:16px
 }
+
 .card{
 overflow:hidden;
 border:1px solid #293039;
 border-radius:15px;
 background:#0b1015
 }
+
 .pic{
 height:220px;
 background:#080b0f;
@@ -234,23 +258,28 @@ display:flex;
 align-items:center;
 justify-content:center
 }
+
 .pic img{
 width:100%;
 height:100%;
 object-fit:cover
 }
+
 .content{
 padding:15px
 }
+
 .muted{
 color:#89949e;
 font-size:13px;
 line-height:1.5
 }
+
 .price{
 font-weight:900;
 margin:12px 0
 }
+
 .btn{
 display:block;
 width:100%;
@@ -264,15 +293,19 @@ text-decoration:none;
 font-weight:900;
 cursor:pointer
 }
+
 .wa{
 background:#18b957;
 margin-top:8px
 }
+
 .featured{
 color:#f22;
 font-size:11px;
-font-weight:900
+font-weight:900;
+margin-bottom:7px
 }
+
 .modal{
 display:none;
 position:fixed;
@@ -282,11 +315,13 @@ z-index:9;
 padding:15px;
 overflow:auto
 }
+
 .modal.on{
 display:flex;
 align-items:center;
 justify-content:center
 }
+
 .box{
 width:min(850px,100%);
 padding:20px;
@@ -294,10 +329,12 @@ border:1px solid #333;
 border-radius:15px;
 background:#090d11
 }
+
 .form{
 display:grid;
 gap:10px
 }
+
 .form input,
 .form textarea,
 .form select{
@@ -308,51 +345,66 @@ border-radius:8px;
 background:#06090c;
 color:white
 }
+
 .two{
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:10px
 }
+
 .redbtn{
 background:#f22
 }
+
 .list{
 display:grid;
 gap:10px
 }
+
 .item{
 padding:15px;
 border:1px solid #293039;
 border-radius:10px;
 background:#0b1015
 }
+
 .top{
 display:flex;
 justify-content:space-between;
 gap:10px
 }
+
 footer{
 text-align:center;
 color:#69737d;
 padding:30px;
 border-top:1px solid #20252a
 }
+
 @media(max-width:650px){
-.controls,.two{
+
+.controls,
+.two{
 grid-template-columns:1fr;
 display:grid
 }
+
 .grid{
 grid-template-columns:1fr 1fr
 }
+
 .pic{
 height:160px
 }
+
 }
+
 @media(max-width:400px){
+
 .grid{
 grid-template-columns:1fr
 }
+
 }
 `;
 
@@ -371,55 +423,114 @@ ${body}
 </html>`;
 }
 
+
+/* =========================
+   PUBLIC CATALOGUE
+========================= */
+
 function publicPage(){
-  return shell(`
+
+return shell(`
+
 <header>
-<img class="logo" src="${LOGO_SOURCE}" alt="AOP Logo">
+
+<img
+class="logo"
+src="${LOGO_SOURCE}"
+alt="AOP Logo"
+>
+
 <div class="brand">
-ALANG ORIGINAL PRODUCTS <span class="red">AOP</span>
+ALANG ORIGINAL PRODUCTS
+<span class="red">AOP</span>
 </div>
+
 <div class="tag">
 <b>ALL ORIGINAL ALANG PRODUCTS WILL BE AVAILABLE HERE.</b>
 </div>
+
 </header>
 
+
 <main>
+
 <section class="intro">
-<div class="red">ALANG INDUSTRIAL MARKET</div>
-<h1>ORIGINAL <span class="red">ALANG</span> PRODUCTS</h1>
+
+<div class="red">
+ALANG INDUSTRIAL MARKET
+</div>
+
+<h1>
+ORIGINAL <span class="red">ALANG</span> PRODUCTS
+</h1>
+
 <p>
 Discover original industrial products from Alang, Gujarat.
 Explore products, availability and direct inquiries.
 </p>
+
 </section>
 
+
 <div class="controls">
-<input id="q" placeholder="Search products...">
+
+<input
+id="q"
+placeholder="Search products..."
+>
+
 <select id="c">
-<option value="">All Categories</option>
+<option value="">
+All Categories
+</option>
 </select>
+
 </div>
 
-<div id="count" class="muted"></div>
-<div id="g" class="grid"></div>
+
+<div
+id="count"
+class="muted"
+>
+Loading products...
+</div>
+
+
+<div
+id="g"
+class="grid"
+>
+</div>
+
 </main>
 
+
 <footer>
-ALANG ORIGINAL PRODUCTS (AOP)<br>
+
+ALANG ORIGINAL PRODUCTS (AOP)
+<br>
 Original industrial products from Alang, Gujarat.
+
 </footer>
 
-<div id="mo" class="modal">
-<div class="box" id="mb"></div>
+
+<div
+id="mo"
+class="modal"
+>
+
+<div
+class="box"
+id="mb"
+>
 </div>
 
+</div>
+
+
 <script>
+
 (async function(){
-
-try{
-
-const D=await fetch("/api/products").then(r=>r.json());
-const WA="${WHATSAPP_NUMBER}";
 
 const g=document.getElementById("g");
 const q=document.getElementById("q");
@@ -428,58 +539,203 @@ const count=document.getElementById("count");
 const mo=document.getElementById("mo");
 const mb=document.getElementById("mb");
 
-[...new Set(
-D.map(x=>x.category).filter(Boolean)
-)]
-.sort()
-.forEach(x=>{
-c.insertAdjacentHTML(
-"beforeend",
-"<option>"+x+"</option>"
-);
-});
+let D=[];
 
-function link(p){
-return location.origin+
-location.pathname+
-"?product="+p.id;
+
+/* LOAD PRODUCTS */
+
+try{
+
+const response=await fetch(
+"/api/products",
+{
+cache:"no-store"
+}
+);
+
+if(!response.ok){
+throw new Error("API error");
 }
 
-function show(id){
+D=await response.json();
 
-const p=D.find(x=>+x.id===+id);
+if(!Array.isArray(D)){
+D=[];
+}
 
-if(!p)return;
 
-mb.innerHTML=
-"<button class='btn redbtn' onclick='document.getElementById(\"mo\").classList.remove(\"on\")'>CLOSE</button>"+
-(
-p.images[0]
-?
-"<img style='width:100%;max-height:430px;object-fit:contain' src='"+p.images[0]+"'>"
-:
-""
-)+
-"<h2>"+p.name+"</h2>"+
-"<div class='muted'>"+p.category+"</div>"+
-"<p>"+p.description+"</p>"+
-"<div class='price'>"+p.price+"</div>"+
-(
-WA
-?
-"<a class='btn wa' target='_blank' href='https://wa.me/"+
+/* CATEGORY LIST */
+
+const categories=[
+...new Set(
+D
+.map(function(x){
+return x.category;
+})
+.filter(Boolean)
+)
+.sort();
+
+
+categories.forEach(function(category){
+
+const option=document.createElement("option");
+
+option.value=category;
+option.textContent=category;
+
+c.appendChild(option);
+
+});
+
+
+/* PRODUCT LINK */
+
+function productLink(product){
+
+return location.origin+
+location.pathname+
+"?product="+product.id;
+
+}
+
+
+/* SHOW PRODUCT */
+
+function showProduct(id){
+
+const p=D.find(function(x){
+
+return Number(x.id)===Number(id);
+
+});
+
+if(!p){
+return;
+}
+
+
+/* CLEAR MODAL */
+
+mb.innerHTML="";
+
+
+/* CLOSE BUTTON */
+
+const close=document.createElement("button");
+
+close.className="btn redbtn";
+close.textContent="CLOSE";
+
+close.onclick=function(){
+
+mo.classList.remove("on");
+
+history.replaceState(
+null,
+"",
+location.pathname
+);
+
+};
+
+mb.appendChild(close);
+
+
+/* IMAGE */
+
+if(
+p.images &&
+p.images.length
+){
+
+const img=document.createElement("img");
+
+img.src=p.images[0];
+
+img.alt=p.name;
+
+img.style.width="100%";
+img.style.maxHeight="430px";
+img.style.objectFit="contain";
+img.style.marginTop="15px";
+
+mb.appendChild(img);
+
+}
+
+
+/* NAME */
+
+const title=document.createElement("h2");
+
+title.textContent=p.name;
+
+mb.appendChild(title);
+
+
+/* CATEGORY */
+
+const category=document.createElement("div");
+
+category.className="muted";
+
+category.textContent=p.category;
+
+mb.appendChild(category);
+
+
+/* DESCRIPTION */
+
+const description=document.createElement("p");
+
+description.textContent=p.description;
+
+mb.appendChild(description);
+
+
+/* PRICE */
+
+const price=document.createElement("div");
+
+price.className="price";
+
+price.textContent=p.price;
+
+mb.appendChild(price);
+
+
+/* WHATSAPP */
+
+const WA="${WHATSAPP_NUMBER}";
+
+if(WA){
+
+const wa=document.createElement("a");
+
+wa.className="btn wa";
+
+wa.target="_blank";
+
+wa.href=
+"https://wa.me/"+
 WA+
 "?text="+
 encodeURIComponent(
 "Hello, I am interested in this product: "+
 p.name+
 " | Product Link: "+
-link(p)
-)+
-"'>WHATSAPP INQUIRY</a>"
-:
-""
+productLink(p)
 );
+
+wa.textContent="WHATSAPP INQUIRY";
+
+mb.appendChild(wa);
+
+}
+
+
+/* OPEN */
 
 mo.classList.add("on");
 
@@ -488,105 +744,306 @@ null,
 "",
 "?product="+p.id
 );
+
 }
 
-window.show=show;
+
+/* RENDER PRODUCTS */
 
 function render(){
 
-const s=q.value.toLowerCase();
-const cat=c.value;
-
-const L=D.filter(p=>
-(!s ||
-(p.name+" "+p.category+" "+p.description)
+const search=
+(q.value||"")
 .toLowerCase()
-.includes(s)
-)&&
-(!cat || p.category===cat)
+.trim();
+
+const category=c.value;
+
+
+const list=D.filter(function(p){
+
+const text=
+(
+p.name+
+" "+
+p.category+
+" "+
+p.description
+)
+.toLowerCase();
+
+
+return(
+(!search || text.includes(search)) &&
+(!category || p.category===category)
 );
 
-count.textContent=L.length+" Products";
+});
 
-g.innerHTML=L.length
-?
-L.map(p=>
-"<article class='card'>"+
-"<div class='pic'>"+
+
+count.textContent=
+list.length+
 (
-p.images[0]
-?
-"<img src='"+p.images[0]+"'>"
-:
-"AOP PRODUCT"
-)+
-"</div>"+
-"<div class='content'>"+
-(
-p.featured
-?
-"<div class='featured'>★ FEATURED</div>"
-:
-""
-)+
-"<h3>"+p.name+"</h3>"+
-"<div class='muted'>"+p.category+"</div>"+
-"<p class='muted'>"+p.description+"</p>"+
-"<div class='price'>"+p.price+"</div>"+
-"<button class='btn' onclick='show("+p.id+")'>VIEW PRODUCT</button>"+
-"</div>"+
-"</article>"
-).join("")
-:
-"<div class='muted'>No products found.</div>";
+list.length===1
+?" Product"
+:" Products"
+);
+
+
+g.innerHTML="";
+
+
+if(!list.length){
+
+const empty=document.createElement("div");
+
+empty.className="muted";
+
+empty.textContent="No products found.";
+
+g.appendChild(empty);
+
+return;
+
 }
 
-q.oninput=render;
-c.onchange=render;
+
+/* CREATE EVERY PRODUCT CARD */
+
+list.forEach(function(p){
+
+const article=document.createElement("article");
+
+article.className="card";
+
+
+/* IMAGE AREA */
+
+const pic=document.createElement("div");
+
+pic.className="pic";
+
+
+if(
+p.images &&
+p.images.length
+){
+
+const img=document.createElement("img");
+
+img.src=p.images[0];
+
+img.alt=p.name;
+
+pic.appendChild(img);
+
+}else{
+
+pic.textContent="AOP PRODUCT";
+
+}
+
+article.appendChild(pic);
+
+
+/* CONTENT */
+
+const content=document.createElement("div");
+
+content.className="content";
+
+
+/* FEATURED */
+
+if(p.featured){
+
+const featured=document.createElement("div");
+
+featured.className="featured";
+
+featured.textContent="★ FEATURED";
+
+content.appendChild(featured);
+
+}
+
+
+/* PRODUCT NAME */
+
+const h3=document.createElement("h3");
+
+h3.textContent=p.name;
+
+content.appendChild(h3);
+
+
+/* CATEGORY */
+
+const cat=document.createElement("div");
+
+cat.className="muted";
+
+cat.textContent=p.category;
+
+content.appendChild(cat);
+
+
+/* DESCRIPTION */
+
+const desc=document.createElement("p");
+
+desc.className="muted";
+
+desc.textContent=p.description;
+
+content.appendChild(desc);
+
+
+/* PRICE */
+
+const price=document.createElement("div");
+
+price.className="price";
+
+price.textContent=p.price;
+
+content.appendChild(price);
+
+
+/* VIEW BUTTON */
+
+const view=document.createElement("button");
+
+view.type="button";
+
+view.className="btn";
+
+view.textContent="VIEW PRODUCT";
+
+view.onclick=function(){
+
+showProduct(p.id);
+
+};
+
+content.appendChild(view);
+
+
+article.appendChild(content);
+
+g.appendChild(article);
+
+});
+
+}
+
+
+/* SEARCH */
+
+q.addEventListener(
+"input",
+render
+);
+
+
+/* CATEGORY */
+
+c.addEventListener(
+"change",
+render
+);
+
+
+/* FIRST RENDER */
 
 render();
 
-const id=new URLSearchParams(
+
+/* OPEN PRODUCT FROM URL */
+
+const productId=
+new URLSearchParams(
 location.search
 ).get("product");
 
-if(id)show(id);
 
-}catch(err){
+if(productId){
 
-document.getElementById("g").innerHTML=
-"<div class='muted'>Unable to load products.</div>";
+showProduct(productId);
+
+}
+
+
+}catch(error){
+
+console.error(error);
+
+count.textContent="";
+
+g.innerHTML="";
+
+const errorBox=document.createElement("div");
+
+errorBox.className="muted";
+
+errorBox.textContent=
+"Unable to load products. Please refresh the page.";
+
+g.appendChild(errorBox);
 
 }
 
 })();
+
 </script>
 
 </body>
 </html>
-`,"ALANG ORIGINAL PRODUCTS | AOP");
+`,
+"ALANG ORIGINAL PRODUCTS | AOP");
+
 }
 
+
+/* =========================
+   ADMIN LOGIN
+========================= */
+
 function login(invalid=false){
-  return shell(`
+
+return shell(`
+
 <main style="max-width:430px;margin:60px auto">
+
 <div class="box">
 
-<img class="logo" src="${LOGO_SOURCE}">
+<img
+class="logo"
+src="${LOGO_SOURCE}"
+>
 
 <h2>
 ALANG ORIGINAL PRODUCTS
 <span class="red">AOP</span>
 </h2>
 
-${invalid?
+${
+invalid
+?
 "<p class='red'>Invalid admin password.</p>"
 :
-""}
+""
+}
 
-<form method="post" action="/admin/login" class="form">
+<form
+method="post"
+action="/admin/login"
+class="form"
+>
 
-<label>ADMIN PASSWORD</label>
+<label>
+ADMIN PASSWORD
+</label>
 
 <input
 name="password"
@@ -601,26 +1058,45 @@ LOGIN TO ADMIN PANEL
 </form>
 
 </div>
+
 </main>
-`,"AOP Admin Login");
+
+`,
+"AOP Admin Login");
+
 }
+
+
+/* =========================
+   ADMIN PANEL
+========================= */
 
 function adminPage(){
 
 return shell(`
+
 <header>
 
 <div class="brand">
 AOP <span class="red">ADMIN PANEL</span>
 </div>
 
-<form method="post" action="/admin/logout">
-<button>LOGOUT</button>
+<form
+method="post"
+action="/admin/logout"
+>
+
+<button>
+LOGOUT
+</button>
+
 </form>
 
 </header>
 
+
 <main>
+
 
 <div class="two">
 
@@ -633,11 +1109,16 @@ onclick="newP()"
 + ADD PRODUCT
 </button>
 
-<a class="btn" href="/">
+
+<a
+class="btn"
+href="/"
+>
 OPEN CATALOGUE
 </a>
 
 </div>
+
 
 <section
 id="editor"
@@ -645,27 +1126,37 @@ class="box"
 style="margin:15px 0;display:none"
 >
 
-<h2 id="et">ADD PRODUCT</h2>
+<h2 id="et">
+ADD PRODUCT
+</h2>
+
 
 <div class="form">
 
-<input id="id" type="hidden">
+<input
+id="id"
+type="hidden"
+>
+
 
 <input
 id="name"
 placeholder="Product Name"
 >
 
+
 <input
 id="cat"
 placeholder="Category"
 >
+
 
 <textarea
 id="desc"
 rows="4"
 placeholder="Description"
 ></textarea>
+
 
 <div class="two">
 
@@ -675,11 +1166,19 @@ placeholder="Price"
 >
 
 <select id="stock">
-<option>In Stock</option>
-<option>Out of Stock</option>
+
+<option>
+In Stock
+</option>
+
+<option>
+Out of Stock
+</option>
+
 </select>
 
 </div>
+
 
 <input
 id="i1"
@@ -706,13 +1205,18 @@ id="i5"
 placeholder="Image URL 5"
 >
 
+
 <label>
+
 <input
 id="feat"
 type="checkbox"
 >
+
 Featured Product
+
 </label>
+
 
 <div class="two">
 
@@ -723,6 +1227,7 @@ onclick="saveP()"
 >
 SAVE PRODUCT
 </button>
+
 
 <button
 type="button"
@@ -738,23 +1243,40 @@ CANCEL
 
 </section>
 
-<h2>PRODUCTS</h2>
 
-<div id="list" class="list"></div>
+<h2>
+PRODUCTS
+</h2>
+
+
+<div
+id="list"
+class="list"
+>
+</div>
+
 
 </main>
 
+
 <script>
 
+
 function e(x){
+
 return document.getElementById(x);
+
 }
+
+
+/* ADD */
 
 function newP(){
 
 e("editor").style.display="block";
 
 e("et").textContent="ADD PRODUCT";
+
 
 [
 "id",
@@ -767,12 +1289,17 @@ e("et").textContent="ADD PRODUCT";
 "i3",
 "i4",
 "i5"
-].forEach(x=>{
+].forEach(function(x){
+
 e(x).value="";
+
 });
 
+
 e("stock").value="In Stock";
+
 e("feat").checked=false;
+
 
 window.scrollTo({
 top:e("editor").offsetTop-20,
@@ -781,6 +1308,9 @@ behavior:"smooth"
 
 }
 
+
+/* EDIT */
+
 function editP(p){
 
 newP();
@@ -788,18 +1318,34 @@ newP();
 e("et").textContent="EDIT PRODUCT";
 
 e("id").value=p.id;
+
 e("name").value=p.name;
+
 e("cat").value=p.category;
+
 e("desc").value=p.description;
+
 e("price").value=p.price;
+
 e("stock").value=p.stock;
+
 e("feat").checked=p.featured;
 
-p.images.forEach((x,i)=>{
+
+(p.images||[]).forEach(function(x,i){
+
+if(i<5){
+
 e("i"+(i+1)).value=x;
+
+}
+
 });
 
 }
+
+
+/* CANCEL */
 
 function cancelP(){
 
@@ -807,29 +1353,52 @@ e("editor").style.display="none";
 
 }
 
+
+/* SAVE */
+
 async function saveP(){
 
 const p={
+
 id:e("id").value,
+
 name:e("name").value.trim(),
+
 category:e("cat").value.trim(),
+
 description:e("desc").value.trim(),
+
 price:e("price").value.trim(),
+
 stock:e("stock").value,
+
 featured:e("feat").checked,
+
 images:[
-1,2,3,4,5
+1,
+2,
+3,
+4,
+5
 ]
-.map(i=>e("i"+i).value.trim())
+.map(function(i){
+
+return e("i"+i).value.trim();
+
+})
 .filter(Boolean)
+
 };
+
 
 if(!p.name){
 
 alert("Product Name is required");
 
 return;
+
 }
+
 
 try{
 
@@ -844,31 +1413,48 @@ body:JSON.stringify(p)
 }
 );
 
+
 if(r.ok){
 
-alert("Product saved successfully.");
+alert(
+"Product saved successfully."
+);
 
 location.reload();
 
 }else{
 
-alert("Save failed.");
+alert(
+"Save failed."
+);
 
 }
 
 }catch(err){
 
-alert("Network error. Please try again.");
+alert(
+"Network error. Please try again."
+);
 
 }
 
 }
+
+
+/* DELETE */
 
 async function delP(id){
 
-if(!confirm("Delete this product?")){
+if(
+!confirm(
+"Delete this product?"
+)
+){
+
 return;
+
 }
+
 
 try{
 
@@ -879,9 +1465,12 @@ method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
-body:JSON.stringify({id})
+body:JSON.stringify({
+id:id
+})
 }
 );
+
 
 if(r.ok){
 
@@ -889,17 +1478,24 @@ location.reload();
 
 }else{
 
-alert("Delete failed.");
+alert(
+"Delete failed."
+);
 
 }
 
 }catch(err){
 
-alert("Network error.");
+alert(
+"Network error."
+);
 
 }
 
 }
+
+
+/* GLOBAL FUNCTIONS */
 
 window.newP=newP;
 window.editP=editP;
@@ -907,54 +1503,123 @@ window.cancelP=cancelP;
 window.saveP=saveP;
 window.delP=delP;
 
+
+/* LOAD ADMIN PRODUCTS */
+
 (async function(){
 
 try{
 
-const D=await fetch(
-"/api/products"
-).then(r=>r.json());
+const response=await fetch(
+"/api/products",
+{
+cache:"no-store"
+}
+);
+
+const D=await response.json();
 
 const list=e("list");
 
-if(!D.length){
+
+if(!Array.isArray(D)||!D.length){
 
 list.innerHTML=
 "<div class='muted'>No products yet. Click + ADD PRODUCT.</div>";
 
 return;
+
 }
 
-list.innerHTML=D.map(p=>
 
-"<div class='item'>"+
+list.innerHTML="";
 
-"<div class='top'>"+
-"<b>"+p.name+"</b>"+
-"<span>"+p.price+"</span>"+
-"</div>"+
 
-"<div class='muted'>"+
+D.forEach(function(p){
+
+const item=document.createElement("div");
+
+item.className="item";
+
+
+const top=document.createElement("div");
+
+top.className="top";
+
+
+const name=document.createElement("b");
+
+name.textContent=p.name;
+
+
+const price=document.createElement("span");
+
+price.textContent=p.price;
+
+
+top.appendChild(name);
+
+top.appendChild(price);
+
+item.appendChild(top);
+
+
+const info=document.createElement("div");
+
+info.className="muted";
+
+info.textContent=
 p.category+
 " • "+
-p.stock+
-"</div>"+
+p.stock;
 
-"<div class='two'>"+
+item.appendChild(info);
 
-"<button type='button' onclick='editP("+
-JSON.stringify(p).replace(/'/g,"&#39;")+
-")'>EDIT</button>"+
 
-"<button type='button' class='redbtn' onclick='delP("+
-p.id+
-")'>DELETE</button>"+
+const buttons=document.createElement("div");
 
-"</div>"+
+buttons.className="two";
 
-"</div>"
 
-).join("");
+const edit=document.createElement("button");
+
+edit.type="button";
+
+edit.textContent="EDIT";
+
+edit.onclick=function(){
+
+editP(p);
+
+};
+
+
+const del=document.createElement("button");
+
+del.type="button";
+
+del.className="redbtn";
+
+del.textContent="DELETE";
+
+del.onclick=function(){
+
+delP(p.id);
+
+};
+
+
+buttons.appendChild(edit);
+
+buttons.appendChild(del);
+
+item.appendChild(buttons);
+
+
+list.appendChild(item);
+
+});
+
 
 }catch(err){
 
@@ -969,40 +1634,60 @@ e("list").innerHTML=
 
 </body>
 </html>
-`,"AOP Admin Panel");
+`,
+"AOP Admin Panel");
+
 }
+
+
+/* =========================
+   ADMIN ROUTES
+========================= */
 
 async function admin(r,e,u){
 
 if(
-u.pathname==="/admin"||
+u.pathname==="/admin" ||
 u.pathname==="/admin/"
 ){
 
 if(!(await auth(r,e))){
+
 return html(login());
+
 }
 
 return html(adminPage());
+
 }
+
 
 if(u.pathname==="/admin/login"){
 
 if(r.method!=="POST"){
+
 return redir("/admin");
+
 }
 
+
 if(!e.ADMIN_PASSWORD){
+
 return html(
 "Admin password is not configured",
 503
 );
+
 }
+
 
 const f=await r.formData();
 
+
 if(
-String(f.get("password")||"")!==e.ADMIN_PASSWORD
+String(
+f.get("password")||""
+)!==e.ADMIN_PASSWORD
 ){
 
 return html(
@@ -1012,15 +1697,21 @@ login(true),
 
 }
 
+
 return redir(
 "/admin",
 {
 "Set-Cookie":
-ck(await session(e.ADMIN_PASSWORD))
+ck(
+await session(
+e.ADMIN_PASSWORD
+)
+)
 }
 );
 
 }
+
 
 if(u.pathname==="/admin/logout"){
 
@@ -1033,20 +1724,24 @@ return redir(
 
 }
 
+
 if(!(await auth(r,e))){
 
 return json(
-{error:"Unauthorized"},
+{
+error:"Unauthorized"
+},
 401
 );
 
 }
 
+
 if(
 ![
 "/admin/api/save",
 "/admin/api/delete"
-].includes(u.pathname)||
+].includes(u.pathname) ||
 r.method!=="POST"
 ){
 
@@ -1058,7 +1753,11 @@ return text(
 
 }
 
+
 const x=await r.json();
+
+
+/* DELETE */
 
 if(
 u.pathname.endsWith("/delete")
@@ -1070,17 +1769,28 @@ await e.DB.prepare(
 .bind(x.id)
 .run();
 
-return json({ok:true});
+return json({
+ok:true
+});
+
 }
+
+
+/* SAVE VALIDATION */
 
 if(!x.name){
 
 return json(
-{error:"name required"},
+{
+error:"name required"
+},
 400
 );
 
 }
+
+
+/* IMAGES */
 
 const im=[
 ...(x.images||[]),
@@ -1090,6 +1800,9 @@ null,
 null,
 null
 ].slice(0,5);
+
+
+/* UPDATE */
 
 if(x.id){
 
@@ -1110,6 +1823,9 @@ x.id
 
 }else{
 
+
+/* INSERT */
+
 await e.DB.prepare(
 "INSERT INTO products(name,category,description,price,stock,featured,image1,image2,image3,image4,image5) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
 )
@@ -1126,8 +1842,17 @@ x.featured?1:0,
 
 }
 
-return json({ok:true});
+
+return json({
+ok:true
+});
+
 }
+
+
+/* =========================
+   WORKER
+========================= */
 
 export default{
 
@@ -1135,13 +1860,25 @@ async fetch(r,e){
 
 const u=new URL(r.url);
 
-if(u.pathname==="/aop-logo.png"){
 
-return fetch(LOGO_SOURCE);
+/* LOGO */
+
+if(
+u.pathname==="/aop-logo.png"
+){
+
+return fetch(
+LOGO_SOURCE
+);
 
 }
 
-if(u.pathname==="/api/products"){
+
+/* PRODUCTS API */
+
+if(
+u.pathname==="/api/products"
+){
 
 try{
 
@@ -1149,19 +1886,30 @@ return json(
 await getProducts(e)
 );
 
-}catch{
+}catch(err){
 
-return json([]);
+return json(
+[],
+200
+);
 
 }
 
 }
 
-if(u.pathname.startsWith("/admin")){
+
+/* ADMIN */
+
+if(
+u.pathname.startsWith("/admin")
+){
 
 return admin(r,e,u);
 
 }
+
+
+/* PUBLIC */
 
 return html(
 publicPage()
