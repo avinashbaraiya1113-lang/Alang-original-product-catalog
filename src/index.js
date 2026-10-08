@@ -1,36 +1,193 @@
-// AOP ADMIN ROUTE DEPLOYMENT UPDATE
-const WHATSAPP_NUMBER = "";
-const LOGO_SOURCE = "https://raw.githubusercontent.com/avinashbaraiya1113-lang/Alang-original-product-catalog/main/src/aop-logo.png";
-const COOKIE = "AOP_ADMIN_SESSION";
-const MAX_AGE = 86400000;
+const WHATSAPP_NUMBER="";
+const LOGO_SOURCE="https://raw.githubusercontent.com/avinashbaraiya1113-lang/Alang-original-product-catalog/main/src/aop-logo.png";
+const COOKIE="AOP_ADMIN_SESSION",MAX_AGE=86400000;
 
-function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{"Content-Type":"application/json;charset=UTF-8","Cache-Control":"no-store"}})}
-function html(body,status=200,headers={}){return new Response(body,{status,headers:{"Content-Type":"text/html;charset=UTF-8","Cache-Control":"no-store",...headers}})}
-function redirect(to,headers={}){return new Response(null,{status:302,headers:{Location:to,"Cache-Control":"no-store",...headers}})}
-function safeJson(v){return JSON.stringify(v).replace(/</g,"\\u003c").replace(/>/g,"\\u003e").replace(/&/g,"\\u0026")}
-function b64(bytes){let s="";for(let i=0;i<bytes.length;i+=32768)s+=String.fromCharCode(...bytes.subarray(i,i+32768));return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"")}
-function unb64(s){s=s.replace(/-/g,"+").replace(/_/g,"/");s+="=".repeat((4-s.length%4)%4);const x=atob(s),b=new Uint8Array(x.length);for(let i=0;i<x.length;i++)b[i]=x.charCodeAt(i);return new TextDecoder().decode(b)}
-async function sign(secret,text){const k=await crypto.subtle.importKey("raw",new TextEncoder().encode(secret),{name:"HMAC",hash:"SHA-256"},false,["sign"]);return b64(new Uint8Array(await crypto.subtle.sign("HMAC",k,new TextEncoder().encode(text))))}
-async function makeSession(secret){const n=new Uint8Array(24);crypto.getRandomValues(n);const p=Date.now()+"."+b64(n);return b64(new TextEncoder().encode(p+"."+await sign(secret,p)))}
-async function auth(req,env){if(!env.ADMIN_PASSWORD)return false;const m=(req.headers.get("Cookie")||"").match(/(?:^|;\s*)AOP_ADMIN_SESSION=([^;]+)/);if(!m)return false;try{const d=unb64(m[1]),i=d.lastIndexOf("."),p=d.slice(0,i),t=Number(p.split(".")[0]);return Number.isFinite(t)&&Date.now()-t>=0&&Date.now()-t<=MAX_AGE&&d.slice(i+1)===await sign(env.ADMIN_PASSWORD,p)}catch(e){return false}}
-function setCookie(v){return COOKIE+"="+v+"; Path=/admin; Max-Age=86400; HttpOnly; Secure; SameSite=Strict"}
-function clearCookie(){return COOKIE+"=; Path=/admin; Max-Age=0; HttpOnly; Secure; SameSite=Strict"}
-function sameOrigin(req){const o=req.headers.get("Origin");return !o||o===new URL(req.url).origin}
-async function getProducts(env){const r=await env.DB.prepare(`SELECT id,name,category,description,price,stock,featured,image1,image2,image3,image4,image5,created_at FROM products ORDER BY featured DESC,id DESC`).run();return(r.results||[]).map(x=>({id:x.id,name:x.name||"AOP Product",category:x.category||"Industrial",description:x.description||"",price:x.price||"Price on Request",stock:x.stock||"In Stock",featured:Number(x.featured)===1,images:[x.image1,x.image2,x.image3,x.image4,x.image5].filter(Boolean),created_at:x.created_at||""}))}
+function html(s,status=200,h={}){return new Response(s,{status,headers:{"Content-Type":"text/html;charset=UTF-8","Cache-Control":"no-store",...h}})}
+function text(s,type="text/plain",status=200){return new Response(s,{status,headers:{"Content-Type":type,"Cache-Control":"no-store"}})}
+function json(x,status=200){return new Response(JSON.stringify(x),{status,headers:{"Content-Type":"application/json","Cache-Control":"no-store"}})}
+function redir(x,h={}){return new Response(null,{status:302,headers:{Location:x,...h}})}
 
-function publicPage(data,error){return `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="ALANG ORIGINAL PRODUCTS - Original industrial products from Alang, Gujarat."><title>ALANG ORIGINAL PRODUCTS | AOP</title><style>
-*{box-sizing:border-box;margin:0;padding:0}body{min-height:100vh;overflow-x:hidden;color:#f5f7f9;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at 50% -10%,rgba(255,20,20,.16),transparent 38%),linear-gradient(180deg,#030507,#090d12 50%,#030507)}body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:42px 42px;z-index:-1}header{text-align:center;padding:28px 15px 24px;border-bottom:1px solid rgba(255,255,255,.1);background:#070a0e;box-shadow:0 15px 45px rgba(0,0,0,.45)}.logo{display:block;width:min(400px,88vw);max-height:220px;object-fit:contain;margin:0 auto 17px;filter:drop-shadow(0 0 22px rgba(255,20,20,.25))}.brand{font-size:clamp(23px,5vw,45px);font-weight:900;letter-spacing:.08em}.red{color:#ff2020}.tagline-box{overflow:hidden;margin-top:19px;padding:11px 0;border-top:1px solid rgba(255,30,30,.25);border-bottom:1px solid rgba(255,30,30,.25)}.tagline{display:inline-block;white-space:nowrap;color:#ff2424;font-size:clamp(12px,2.2vw,18px);font-weight:900;letter-spacing:.12em;animation:move 15s linear infinite;text-shadow:0 0 12px rgba(255,0,0,.45)}@keyframes move{from{transform:translateX(100%)}to{transform:translateX(-100%)}}main{width:min(1200px,calc(100% - 28px));margin:30px auto 60px}.intro{text-align:center;padding:18px 10px 32px}.label,.catalogue{color:#ff2020;font-size:12px;font-weight:900;letter-spacing:.25em;margin-bottom:14px}.intro h1{font-size:clamp(31px,7vw,58px);line-height:1.05;font-weight:900;margin-bottom:20px}.intro p{max-width:800px;margin:auto;color:#929da7;font-size:clamp(14px,2vw,18px);line-height:1.7}.features{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:900px;margin:0 auto 42px}.feature{padding:13px 8px;text-align:center;color:#c9cfd4;font-size:11px;font-weight:800;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:rgba(255,255,255,.025)}.feature:before{content:"◆";color:#ff2020;margin-right:6px}.catalogue{text-align:center;margin-bottom:9px}.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:15px}.search,.category{padding:15px 17px;border:1px solid rgba(255,255,255,.11);border-radius:11px;outline:none;color:white;background:#0d1218;font-size:15px}.search{flex:1 1 300px}.category{flex:0 1 220px}.count{color:#7f8a94;font-size:13px;margin-bottom:15px}.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}.card{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.11);border-radius:17px;background:linear-gradient(145deg,#141a20,#080b0f);box-shadow:0 15px 40px rgba(0,0,0,.3)}.card-image{position:relative;height:230px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#0a0e12}.card-image img{width:100%;height:100%;object-fit:cover}.placeholder{color:#5e6973;text-align:center;font-size:13px;font-weight:900}.featured,.stock{position:absolute;top:12px;z-index:2;padding:7px 10px;border-radius:6px;font-size:10px;font-weight:900}.featured{left:12px;color:white;background:#ff2020}.stock{right:12px;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.15)}.in{color:#65ed8d}.out{color:#ff6868}.content{padding:17px}.cat{color:#8d98a3;font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px}.title{font-size:20px;font-weight:900;margin-bottom:9px}.desc{color:#8d98a3;font-size:13px;line-height:1.55;min-height:40px;margin-bottom:13px}.price{font-size:17px;font-weight:900;margin-bottom:13px}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btn{min-height:42px;display:flex;align-items:center;justify-content:center;border:0;border-radius:9px;cursor:pointer;color:white;text-decoration:none;font-size:11px;font-weight:900}.view{background:#222b34}.wa{background:#20b95a}.empty,.db-error{grid-column:1/-1;padding:60px 20px;text-align:center;color:#7f8a94;border:1px dashed rgba(255,255,255,.15);border-radius:15px}.db-error{color:#ff7777;border-color:rgba(255,60,60,.3);background:rgba(255,0,0,.04)}.modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:15px;background:rgba(0,0,0,.85);backdrop-filter:blur(9px)}.modal.show{display:flex}.modal-box{position:relative;width:min(900px,100%);max-height:92vh;overflow-y:auto;border:1px solid rgba(255,255,255,.14);border-radius:20px;background:#080c10}.close{position:absolute;top:12px;right:12px;z-index:5;width:42px;height:42px;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:rgba(0,0,0,.7);color:white;font-size:22px}.modal-grid{display:grid;grid-template-columns:1.1fr .9fr}.gallery{padding:20px}.main-image{width:100%;height:420px;object-fit:cover;border-radius:14px;background:#090d11}.thumbs{display:flex;gap:8px;overflow-x:auto;margin-top:10px}.thumb{width:65px;height:65px;flex-shrink:0;object-fit:cover;border-radius:8px}.details{padding:35px 25px 25px}.details h3{font-size:clamp(25px,5vw,40px);margin:10px 0 15px}.detail-desc{color:#9ba5ae;line-height:1.7;margin:15px 0 25px}.modal-buttons{display:flex;flex-direction:column;gap:10px}.modal-buttons a,.modal-buttons button{width:100%;min-height:48px;display:flex;align-items:center;justify-content:center;border:0;border-radius:10px;color:white;text-decoration:none;font-weight:900}.modal-wa{background:#20b95a}.modal-share{background:#202832}footer{text-align:center;padding:30px 20px;border-top:1px solid rgba(255,255,255,.08);color:#68737d;font-size:12px;line-height:1.7}@media(max-width:750px){.features{grid-template-columns:repeat(2,1fr)}.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card-image{height:160px}.content{padding:12px}.title{font-size:15px}.desc{font-size:11px}.price{font-size:13px}.buttons{grid-template-columns:1fr}.modal-grid{grid-template-columns:1fr}.main-image{height:280px}}@media(max-width:390px){.products{grid-template-columns:1fr}.card-image{height:210px}}
-</style></head><body><header><img class="logo" src="/aop-logo.png?v=8" alt="ALANG ORIGINAL PRODUCTS AOP Logo"><div class="brand">ALANG ORIGINAL PRODUCTS <span class="red">AOP</span></div><div class="tagline-box"><div class="tagline">ALL ORIGINAL ALANG PRODUCTS WILL BE AVAILABLE HERE.</div></div></header><main><section class="intro"><div class="label">ALANG INDUSTRIAL MARKET</div><h1>ORIGINAL <span class="red">ALANG</span><br>PRODUCTS</h1><p>Discover original industrial products from Alang, Gujarat. Explore products, check availability and contact us directly for product inquiries.</p></section><div class="features"><div class="feature">ORIGINAL PRODUCTS</div><div class="feature">ALANG INDUSTRIAL MARKET</div><div class="feature">DIRECT INQUIRY</div><div class="feature">QUALITY FOCUSED</div></div><div class="catalogue">AOP CATALOGUE</div><h2>FEATURED PRODUCTS</h2><div class="controls"><input id="search" class="search" type="search" placeholder="Search products..."><select id="category" class="category"><option value="all">All Categories</option></select></div><div id="count" class="count">0 Products</div><div id="products" class="products">${error?`<div class="db-error"><h3>Catalogue temporarily unavailable</h3><br><p>The product database could not be loaded. Please try again shortly.</p></div>`:""}</div></main><footer><strong>ALANG ORIGINAL PRODUCTS (AOP)</strong><br>Original industrial products from Alang, Gujarat.</footer><div id="modal" class="modal"><div class="modal-box"><button id="close" class="close">×</button><div id="modalContent" class="modal-grid"></div></div></div><script>
-const DATA=${safeJson(data)},WA=${JSON.stringify(WHATSAPP_NUMBER)},products=document.getElementById("products"),search=document.getElementById("search"),category=document.getElementById("category"),count=document.getElementById("count"),modal=document.getElementById("modal"),modalContent=document.getElementById("modalContent"),close=document.getElementById("close");
-function loadCategories(){const list=[];DATA.forEach(function(p){if(p.category&&!list.includes(p.category))list.push(p.category)});list.sort();list.forEach(function(c){const o=document.createElement("option");o.value=c;o.textContent=c;category.appendChild(o)})}
-function productImage(p){return Array.isArray(p.images)&&p.images.length?p.images[0]:""}
-function waLink(p){if(!WA)return"#";const link=location.origin+location.pathname+"?product="+encodeURIComponent(p.id),message="Hello, I am interested in this product: "+p.name+" | Product Link: "+link;return"https://wa.me/"+WA+"?text="+encodeURIComponent(message)}
-function makeCard(p){const card=document.createElement("article");card.className="card";if(p.featured){const f=document.createElement("div");f.className="featured";f.textContent="★ FEATURED";card.appendChild(f)}const imageBox=document.createElement("div");imageBox.className="card-image";const image=productImage(p);if(image){const img=document.createElement("img");img.src=image;img.alt=p.name;img.loading="lazy";imageBox.appendChild(img)}else{const placeholder=document.createElement("div");placeholder.className="placeholder";placeholder.innerHTML="AOP PRODUCT<br>IMAGE";imageBox.appendChild(placeholder)}const stock=document.createElement("div");stock.className="stock "+(String(p.stock).toLowerCase().includes("out")?"out":"in");stock.textContent=p.stock||"In Stock";imageBox.appendChild(stock);card.appendChild(imageBox);const content=document.createElement("div");content.className="content";const cat=document.createElement("div");cat.className="cat";cat.textContent=p.category||"Industrial";const title=document.createElement("div");title.className="title";title.textContent=p.name||"AOP Product";const desc=document.createElement("div");desc.className="desc";desc.textContent=p.description||"";const price=document.createElement("div");price.className="price";price.textContent=p.price||"Price on Request";const buttons=document.createElement("div");buttons.className="buttons";const view=document.createElement("button");view.className="btn view";view.textContent="VIEW PRODUCT";view.onclick=function(){openProduct(p.id)};const wa=document.createElement("a");wa.className="btn wa";wa.textContent="WHATSAPP";if(WA){wa.href=waLink(p);wa.target="_blank";wa.rel="noopener"}else{wa.href="#";wa.onclick=function(event){event.preventDefault();openProduct(p.id)}}buttons.appendChild(view);buttons.appendChild(wa);content.appendChild(cat);content.appendChild(title);content.appendChild(desc);content.appendChild(price);content.appendChild(buttons);card.appendChild(content);return card}
-function render(){const query=search.value.trim().toLowerCase(),selected=category.value;const list=DATA.filter(function(p){const text=((p.name||"")+" "+(p.category||"")+" "+(p.description||"")).toLowerCase();return(!query||text.includes(query))&&(selected==="all"||p.category===selected)});products.innerHTML="";count.textContent=list.length+(list.length===1?" Product":" Products");if(!list.length){const empty=document.createElement("div");empty.className="empty";empty.innerHTML="<h3>No products found</h3><br><p>Try another search or category.</p>";products.appendChild(empty);return}list.forEach(function(p){products.appendChild(makeCard(p))})}
-function openProduct(id){const p=DATA.find(function(x){return Number(x.id)===Number(id)});if(!p)return;const images=Array.isArray(p.images)?p.images:[],main=images[0]||"";modalContent.innerHTML="";const gallery=document.createElement("div");gallery.className="gallery";const mainImg=document.createElement("img");mainImg.className="main-image";mainImg.src=main;mainImg.alt=p.name;if(!main)mainImg.style.display="none";gallery.appendChild(mainImg);const thumbs=document.createElement("div");thumbs.className="thumbs";images.forEach(function(src){const t=document.createElement("img");t.className="thumb";t.src=src;t.alt=p.name;t.onclick=function(){mainImg.src=src;mainImg.style.display="block"};thumbs.appendChild(t)});gallery.appendChild(thumbs);const details=document.createElement("div");details.className="details";const cat=document.createElement("div");cat.className="cat";cat.textContent=p.category||"Industrial";const h=document.createElement("h3");h.textContent=p.name||"AOP Product";const d=document.createElement("div");d.className="detail-desc";d.textContent=p.description||"Original industrial product from Alang.";const pr=document.createElement("div");pr.className="price";pr.textContent=p.price||"Price on Request";const sb=document.createElement("div");sb.className="modal-buttons";if(WA){const a=document.createElement("a");a.className="modal-wa";a.href=waLink(p);a.target="_blank";a.rel="noopener";a.textContent="WHATSAPP INQUIRY";sb.appendChild(a)}const share=document.createElement("button");share.className="modal-share";share.textContent="SHARE PRODUCT";share.onclick=function(){const url=location.origin+location.pathname+"?product="+encodeURIComponent(p.id);if(navigator.share){navigator.share({title:p.name,text:"AOP Product: "+p.name,url:url}).catch(function(){})}else{navigator.clipboard&&navigator.clipboard.writeText(url);share.textContent="LINK COPIED"}};sb.appendChild(share);details.appendChild(cat);details.appendChild(h);details.appendChild(d);details.appendChild(pr);details.appendChild(sb);modalContent.appendChild(gallery);modalContent.appendChild(details);modal.classList.add("show");history.replaceState(null,"","?product="+encodeURIComponent(p.id))}
-close.onclick=function(){modal.classList.remove("show");history.replaceState(null,"",location.pathname)};modal.onclick=function(e){if(e.target===modal)close.onclick()};search.addEventListener("input",render);category.addEventListener("change",render);loadCategories();render();const qp=new URLSearchParams(location.search).get("product");if(qp)openProduct(qp);
-</script></body></html>`}
+function enc(b){
+ let s="";
+ for(let i=0;i<b.length;i+=32768)s+=String.fromCharCode(...b.subarray(i,i+32768));
+ return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")
+}
 
-function loginPage(configured,invalid=false){return `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AOP Admin Login</title><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#030507;color:#fff;font-family:Arial,Helvetica,sans-serif}body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 50% 20%,rgba(255,20,20,.14),transparent 40%);pointer-events:none}.box{width:min(430px,100%);padding:32px;border:1px solid rgba(255,255,255,.13);border-radius:18px;background:#0b1015;box-shadow:0 20px 60px rgba(0,0,0,.5);position:relative}.logo{width:190px;display:block;margin:0 auto 20px}.brand{text-align:center;font-size:22px;font-weight:900;letter-spacing:.05em;margin-bottom:7px}.red{color:#ff2020}.sub{text-align:center;color:#7f8a94;font-size:12px;margin-bottom:25px}label{display:block;font-size:11px;font-weight:900;letter-spacing:.12em;color:#aeb7bf;margin-bottom:8px}input{width:100%;padding:14px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:#070b0f;color:#fff;outline:none;margin-bottom:14px}button{width:100%;padding:14px;border:0;border-radius:9px;background:#ff2020;color:#fff;font-weight:900;cursor:pointer}.error{padding:10px;border-radius:8px;background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.25);color:#ff7777;font-size:12px;margin-bottom:14px}.disabled{color:#ff7777;text-align:center;font-size:13px}</style></head><body><div class="box"><img class="logo" src="/aop-logo.png?v=8" alt="AOP Logo"><div class="brand">ALANG ORIGINAL PRODUCTS <span class="red">AOP</span></div><div class="sub">ADMIN PANEL</div>${invalid?'<div class="error">Invalid admin password.</div>':""}${configured?'<form method="post" action="/admin/login"><label>ADMIN PASSWORD</label><input name="password" type="password" autocomplete="current-password" required><button>LOGIN TO ADMIN PANEL</button></form>':'<div class="disabled">Admin password is not configured.</div>'}</div></body></html>`}
+function dec(s){
+ s=s.replace(/-/g,"+").replace(/_/g,"/");
+ s+="=".repeat((4-s.length%4)%4);
+ return new TextDecoder().decode(Uint8Array.from(atob(s),c=>c.charCodeAt(0)))
+}
 
-function adminPage(data){return `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AOP Admin Panel</title><style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#030507;color:#f5f7f9;font-family:Arial,Helvetica,sans-serif}body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:40px 40px;z-index:-1}header{padding:16px;display:flex;gap:15px;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.1);background:#070a0e;position:sticky;top:0;z-index:20}.head-brand{
+async function sig(secret,p){
+ let k=await crypto.subtle.importKey(
+  "raw",
+  new TextEncoder().encode(secret),
+  {name:"HMAC",hash:"SHA-256"},
+  false,
+  ["sign"]
+ );
+ return enc(new Uint8Array(await crypto.subtle.sign(
+  "HMAC",
+  k,
+  new TextEncoder().encode(p)
+ )))
+}
+
+async function session(secret){
+ let n=new Uint8Array(18);
+ crypto.getRandomValues(n);
+ let p=Date.now()+"."+enc(n);
+ return enc(new TextEncoder().encode(
+  p+"."+await sig(secret,p)
+ ))
+}
+
+async function auth(r,e){
+ if(!e.ADMIN_PASSWORD)return false;
+ let m=(r.headers.get("Cookie")||"").match(/AOP_ADMIN_SESSION=([^;]+)/);
+ if(!m)return false;
+ try{
+  let d=dec(m[1]),
+      i=d.lastIndexOf("."),
+      p=d.slice(0,i),
+      t=+p.split(".")[0];
+  return Date.now()-t>=0 &&
+         Date.now()-t<=MAX_AGE &&
+         d.slice(i+1)===await sig(e.ADMIN_PASSWORD,p)
+ }catch{
+  return false
+ }
+}
+
+function ck(v){
+ return COOKIE+"="+v+"; Path=/admin; Max-Age=86400; HttpOnly; Secure; SameSite=Strict"
+}
+
+async function getProducts(e){
+ let r=await e.DB.prepare(
+  "SELECT id,name,category,description,price,stock,featured,image1,image2,image3,image4,image5 FROM products ORDER BY featured DESC,id DESC"
+ ).run();
+
+ return(r.results||[]).map(x=>({
+  id:x.id,
+  name:x.name||"",
+  category:x.category||"Industrial",
+  description:x.description||"",
+  price:x.price||"Price on Request",
+  stock:x.stock||"In Stock",
+  featured:Number(x.featured)===1,
+  images:[x.image1,x.image2,x.image3,x.image4,x.image5].filter(Boolean)
+ }))
+}
+
+const CSS=`*{box-sizing:border-box}body{margin:0;background:#030507;color:#f5f7f9;font-family:Arial,sans-serif}button,input,select,textarea{font:inherit}header{text-align:center;padding:25px 15px;border-bottom:1px solid #20252a;background:#070a0e}.logo{width:min(380px,88vw);max-height:210px;object-fit:contain}.brand{font-size:clamp(22px,5vw,44px);font-weight:900}.red{color:#f22}.tag{margin:15px auto 0;padding:10px;border-block:1px solid #522;overflow:hidden;color:#f22;font-weight:900;white-space:nowrap}.tag b{display:inline-block;animation:m 14s linear infinite}@keyframes m{from{transform:translateX(100%)}to{transform:translateX(-100%)}}main{width:min(1200px,calc(100% - 28px));margin:30px auto 60px}.intro{text-align:center}.intro p{color:#929da7;line-height:1.7}.controls{display:flex;gap:10px;margin:25px 0}.controls>*{flex:1;padding:14px;border:1px solid #293039;border-radius:9px;background:#0d1218;color:white}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}.card{overflow:hidden;border:1px solid #293039;border-radius:15px;background:#0b1015}.pic{height:220px;background:#080b0f;display:flex;align-items:center;justify-content:center}.pic img{width:100%;height:100%;object-fit:cover}.content{padding:15px}.muted{color:#89949e;font-size:13px;line-height:1.5}.price{font-weight:900;margin:12px 0}.btn{display:block;width:100%;padding:12px;border:0;border-radius:8px;background:#252d35;color:white;text-align:center;text-decoration:none;font-weight:900;cursor:pointer}.wa{background:#18b957;margin-top:8px}.featured{color:#f22;font-size:11px;font-weight:900}.modal{display:none;position:fixed;inset:0;background:#000d;z-index:9;padding:15px;overflow:auto}.modal.on{display:flex;align-items:center;justify-content:center}.box{width:min(850px,100%);padding:20px;border:1px solid #333;border-radius:15px;background:#090d11}.form{display:grid;gap:10px}.form input,.form textarea,.form select{width:100%;padding:12px;border:1px solid #303840;border-radius:8px;background:#06090c;color:white}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.redbtn{background:#f22}.list{display:grid;gap:10px}.item{padding:15px;border:1px solid #293039;border-radius:10px;background:#0b1015}.top{display:flex;justify-content:space-between;gap:10px}footer{text-align:center;color:#69737d;padding:30px;border-top:1px solid #20252a}@media(max-width:650px){.controls,.two{grid-template-columns:1fr;display:grid}.grid{grid-template-columns:1fr 1fr}.pic{height:160px}}@media(max-width:400px){.grid{grid-template-columns:1fr}}`;
+
+const APP=`const D=await fetch("/api/products").then(r=>r.json()),WA="${WHATSAPP_NUMBER}",g=document.getElementById("g"),q=document.getElementById("q"),c=document.getElementById("c"),count=document.getElementById("count"),mo=document.getElementById("mo"),mb=document.getElementById("mb");[...new Set(D.map(x=>x.category).filter(Boolean))].sort().forEach(x=>c.insertAdjacentHTML("beforeend","<option>"+x+"</option>"));function link(p){return location.origin+location.pathname+"?product="+p.id}function show(id){let p=D.find(x=>+x.id===+id);if(!p)return;mb.innerHTML="<button class='btn redbtn' onclick='mo.classList.remove(\\\"on\\\")'>CLOSE</button>"+(p.images[0]?"<img style='width:100%;max-height:430px;object-fit:contain' src='"+p.images[0]+"'>":"")+"<h2>"+p.name+"</h2><div class='muted'>"+p.category+"</div><p>"+p.description+"</p><div class='price'>"+p.price+"</div>"+(WA?"<a class='btn wa' target='_blank' href='https://wa.me/"+WA+"?text="+encodeURIComponent("Hello, I am interested in this product: "+p.name+" | Product Link: "+link(p))+"'>WHATSAPP INQUIRY</a>":"");mo.classList.add("on");history.replaceState(null,"","?product="+p.id)}function render(){let s=q.value.toLowerCase(),cat=c.value,L=D.filter(p=>(!s||(p.name+" "+p.category+" "+p.description).toLowerCase().includes(s))&&(!cat||p.category===cat));count.textContent=L.length+" Products";g.innerHTML=L.length?L.map(p=>"<article class='card'><div class='pic'>"+(p.images[0]?"<img src='"+p.images[0]+"'>":"AOP PRODUCT")+"</div><div class='content'>"+(p.featured?"<div class='featured'>★ FEATURED</div>":"")+"<h3>"+p.name+"</h3><div class='muted'>"+p.category+"</div><p class='muted'>"+p.description+"</p><div class='price'>"+p.price+"</div><button class='btn' onclick='show("+p.id+")'>VIEW PRODUCT</button></div></article>").join(""):"<div class='muted'>No products found.</div>"}q.oninput=render;c.onchange=render;render();let id=new URLSearchParams(location.search).get("product");if(id)show(id);`;
+
+const ADMINJS=`const D=await fetch("/api/products").then(r=>r.json());function e(x){return document.getElementById(x)}function newP(){e("editor").style.display="block";e("et").textContent="ADD PRODUCT";["id","name","cat","desc","price","i1","i2","i3","i4","i5"].forEach(x=>e(x).value="");e("stock").value="In Stock";e("feat").checked=false}function editP(p){newP();e("et").textContent="EDIT PRODUCT";e("id").value=p.id;e("name").value=p.name;e("cat").value=p.category;e("desc").value=p.description;e("price").value=p.price;e("stock").value=p.stock;e("feat").checked=p.featured;p.images.forEach((x,i)=>e("i"+(i+1)).value=x)}function cancelP(){e("editor").style.display="none"}async function saveP(){let p={id:e("id").value,name:e("name").value,category:e("cat").value,description:e("desc").value,price:e("price").value,stock:e("stock").value,featured:e("feat").checked,images:[1,2,3,4,5].map(i=>e("i"+i).value).filter(Boolean)};if(!p.name)return alert("Product Name is required");let r=await fetch("/admin/api/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});if(r.ok)location.reload();else alert("Save failed")}async function delP(id){if(!confirm("Delete this product?"))return;let r=await fetch("/admin/api/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id})});if(r.ok)location.reload();else alert("Delete failed")}e("list").innerHTML=D.length?D.map(p=>"<div class='item'><div class='top'><b>"+p.name+"</b><span>"+p.price+"</span></div><div class='muted'>"+p.category+" • "+p.stock+"</div><div class='two'><button onclick='editP("+JSON.stringify(p)+")'>EDIT</button><button class='redbtn' onclick='delP("+p.id+")'>DELETE</button></div></div>").join(""):"<div class='muted'>No products yet. Click + ADD PRODUCT.</div>";`;
+
+function shell(body,title){
+ return`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>${CSS}</style></head><body>${body}</body></html>`
+}
+
+function publicPage(){
+ return shell(`<header><img class="logo" src="${LOGO_SOURCE}" alt="AOP Logo"><div class="brand">ALANG ORIGINAL PRODUCTS <span class="red">AOP</span></div><div class="tag"><b>ALL ORIGINAL ALANG PRODUCTS WILL BE AVAILABLE HERE.</b></div></header><main><section class="intro"><div class="red">ALANG INDUSTRIAL MARKET</div><h1>ORIGINAL <span class="red">ALANG</span> PRODUCTS</h1><p>Discover original industrial products from Alang, Gujarat. Explore products, availability and direct inquiries.</p></section><div class="controls"><input id="q" placeholder="Search products..."><select id="c"><option value="">All Categories</option></select></div><div id="count" class="muted"></div><div id="g" class="grid"></div></main><footer>ALANG ORIGINAL PRODUCTS (AOP)<br>Original industrial products from Alang, Gujarat.</footer><div id="mo" class="modal"><div class="box" id="mb"></div></div><script type="module" src="/app.js"></script></body></html>`,"ALANG ORIGINAL PRODUCTS | AOP")
+}
+
+function login(invalid=false){
+ return shell(`<main style="max-width:430px;margin:60px auto"><div class="box"><img class="logo" src="${LOGO_SOURCE}"><h2>ALANG ORIGINAL PRODUCTS <span class="red">AOP</span></h2>${invalid?"<p class='red'>Invalid admin password.</p>":""}<form method="post" action="/admin/login" class="form"><label>ADMIN PASSWORD</label><input name="password" type="password" required><button class="btn redbtn">LOGIN TO ADMIN PANEL</button></form></div></main>`,"AOP Admin Login")
+}
+
+function adminPage(){
+ return shell(`<header><div class="brand">AOP <span class="red">ADMIN PANEL</span></div><form method="post" action="/admin/logout"><button>LOGOUT</button></form></header><main><div class="two"><button class="btn redbtn" onclick="newP()">+ ADD PRODUCT</button><a class="btn" href="/">OPEN CATALOGUE</a></div><section id="editor" class="box" style="margin:15px 0;display:none"><h2 id="et">ADD PRODUCT</h2><div class="form"><input id="id" type="hidden"><input id="name" placeholder="Product Name"><input id="cat" placeholder="Category"><textarea id="desc" rows="4" placeholder="Description"></textarea><div class="two"><input id="price" placeholder="Price"><select id="stock"><option>In Stock</option><option>Out of Stock</option></select></div><input id="i1" placeholder="Image URL 1"><input id="i2" placeholder="Image URL 2"><input id="i3" placeholder="Image URL 3"><input id="i4" placeholder="Image URL 4"><input id="i5" placeholder="Image URL 5"><label><input id="feat" type="checkbox"> Featured Product</label><div class="two"><button class="btn redbtn" onclick="saveP()">SAVE PRODUCT</button><button class="btn" onclick="cancelP()">CANCEL</button></div></div></section><h2>PRODUCTS</h2><div id="list" class="list"></div></main><script type="module" src="/admin.js"></script></body></html>`,"AOP Admin Panel")
+}
+
+async function admin(r,e,u){
+ if(u.pathname==="/admin"||u.pathname==="/admin/"){
+  if(!(await auth(r,e)))return html(login());
+  return html(adminPage())
+ }
+
+ if(u.pathname==="/admin/login"){
+  if(r.method!=="POST")return redir("/admin");
+  if(!e.ADMIN_PASSWORD)return html("Admin password is not configured",503);
+  let f=await r.formData();
+  if(String(f.get("password")||"")!==e.ADMIN_PASSWORD)return html(login(true),401);
+  return redir("/admin",{"Set-Cookie":ck(await session(e.ADMIN_PASSWORD))})
+ }
+
+ if(u.pathname==="/admin/logout"){
+  return redir("/admin",{"Set-Cookie":ck("")})
+ }
+
+ if(!await auth(r,e))return json({error:"Unauthorized"},401);
+
+ if(!["/admin/api/save","/admin/api/delete"].includes(u.pathname)||r.method!=="POST"){
+  return text("Not Found","text/plain",404)
+ }
+
+ let x=await r.json();
+
+ if(u.pathname.endsWith("/delete")){
+  await e.DB.prepare("DELETE FROM products WHERE id=?").bind(x.id).run();
+  return json({ok:true})
+ }
+
+ if(!x.name)return json({error:"name required"},400);
+
+ let im=[...(x.images||[]),null,null,null,null,null].slice(0,5);
+
+ if(x.id){
+  await e.DB.prepare(
+   "UPDATE products SET name=?,category=?,description=?,price=?,stock=?,featured=?,image1=?,image2=?,image3=?,image4=?,image5=? WHERE id=?"
+  ).bind(
+   x.name,
+   x.category||"Industrial",
+   x.description||"",
+   x.price||"Price on Request",
+   x.stock||"In Stock",
+   x.featured?1:0,
+   ...im,
+   x.id
+  ).run()
+ }else{
+  await e.DB.prepare(
+   "INSERT INTO products(name,category,description,price,stock,featured,image1,image2,image3,image4,image5) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
+  ).bind(
+   x.name,
+   x.category||"Industrial",
+   x.description||"",
+   x.price||"Price on Request",
+   x.stock||"In Stock",
+   x.featured?1:0,
+   ...im
+  ).run()
+ }
+
+ return json({ok:true})
+}
+
+export default{
+ async fetch(r,e){
+  let u=new URL(r.url);
+
+  if(u.pathname==="/aop-logo.png")return fetch(LOGO_SOURCE);
+
+  if(u.pathname==="/app.js")return text(APP,"application/javascript");
+
+  if(u.pathname==="/admin.js")return text(ADMINJS,"application/javascript");
+
+  if(u.pathname==="/api/products"){
+   try{
+    return json(await getProducts(e))
+   }catch{
+    return json([])
+   }
+  }
+
+  if(u.pathname.startsWith("/admin"))return admin(r,e,u);
+
+  return html(publicPage())
+ }
+};
