@@ -138,14 +138,19 @@ function shell(body, title) {
     "a{text-decoration:none;color:inherit}" +
 
     ".header{position:sticky;top:0;z-index:50;background:rgba(7,8,10,.96);border-bottom:1px solid #292d32;backdrop-filter:blur(12px)}" +
-    ".head{max-width:1250px;margin:auto;padding:14px 18px;display:flex;align-items:center;gap:14px}" +
-    ".logo{width:55px;height:55px;object-fit:contain;border-radius:10px}" +
+
+    ".head{max-width:1250px;margin:auto;padding:14px 18px;display:flex;align-items:center;gap:16px}" +
+
+    /* ONLY LOGO SIZE INCREASED */
+    ".logo{width:72px;height:72px;object-fit:contain;border-radius:10px}" +
+
     ".brand{font-weight:900;font-size:21px;letter-spacing:1px}" +
     ".brand span{color:#e21d2e}" +
 
-    /* ONLY THE RED SCROLLING LINE IS CHANGED */
-    ".tag-wrap{width:min(700px,65vw);overflow:hidden;white-space:nowrap;margin-top:4px}" +
-    ".tag{display:inline-block;font-size:10px;color:#e21d2e;letter-spacing:1.1px;white-space:nowrap;animation:tagscroll 12s linear infinite}" +
+    /* ONLY SCROLLING LINE SIZE/WIDTH INCREASED */
+    ".tag-wrap{width:min(500px,65vw);overflow:hidden;white-space:nowrap;margin-top:5px}" +
+    ".tag{display:inline-block;font-size:12px;color:#e21d2e;letter-spacing:1.2px;white-space:nowrap;animation:tagscroll 12s linear infinite}" +
+
     "@keyframes tagscroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}" +
 
     ".main{max-width:1250px;margin:auto;padding:28px 18px 60px}" +
@@ -233,8 +238,12 @@ function shell(body, title) {
     ".main{padding:20px 11px 45px}" +
     ".hero h1{font-size:25px}" +
     ".brand{font-size:17px}" +
-    ".tag-wrap{width:220px}" +
-    ".tag{font-size:8px}" +
+
+    /* MOBILE LOGO + RED LINE */
+    ".logo{width:66px;height:66px}" +
+    ".tag-wrap{width:330px;max-width:70vw}" +
+    ".tag{font-size:10px;letter-spacing:1px}" +
+
     ".two{grid-template-columns:1fr}" +
     ".content{padding:11px}" +
     ".name{font-size:16px}" +
@@ -834,7 +843,6 @@ async function adminPage(env, editId) {
     "}" +
 
     "function newP(){" +
-
     "document.getElementById('id').value='';" +
     "document.getElementById('name').value='';" +
     "document.getElementById('category').value='';" +
@@ -842,12 +850,8 @@ async function adminPage(env, editId) {
     "document.getElementById('price').value='';" +
     "document.getElementById('stock').value='In Stock';" +
     "document.getElementById('featured').checked=false;" +
-
-    "for(var i=1;i<=5;i++)" +
-    "document.getElementById('image'+i).value='';" +
-
+    "for(var i=1;i<=5;i++)document.getElementById('image'+i).value='';" +
     "document.getElementById('msg').textContent='New product ready.';" +
-
     "window.scrollTo({top:0,behavior:'smooth'});" +
     "}" +
 
@@ -868,8 +872,7 @@ async function adminPage(env, editId) {
     "images:[]" +
     "};" +
 
-    "for(var i=1;i<=5;i++)" +
-    "data.images.push(document.getElementById('image'+i).value);" +
+    "for(var i=1;i<=5;i++)data.images.push(document.getElementById('image'+i).value);" +
 
     "if(!data.name.trim()){" +
     "alert('Product name is required.');" +
@@ -877,38 +880,25 @@ async function adminPage(env, editId) {
     "}" +
 
     "var res=await fetch('/admin/api/save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(data)});" +
-
     "var out=await res.json();" +
 
     "if(out.ok){" +
-
     "document.getElementById('msg').textContent='Product saved successfully.';" +
-
     "setTimeout(function(){location.href='/admin';},500);" +
-
     "}else{" +
-
     "document.getElementById('msg').textContent=out.error||'Save failed.';" +
-
     "}" +
-
     "}" +
 
     "async function delP(id){" +
-
     "if(!confirm('Delete this product?'))return;" +
-
     "var res=await fetch('/admin/api/delete',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:id})});" +
-
     "var out=await res.json();" +
-
     "if(out.ok)location.href='/admin';" +
     "else alert(out.error||'Delete failed.');" +
-
     "}" +
 
     "function renderList(){" +
-
     "var el=document.getElementById('productList');" +
     "el.innerHTML='';" +
 
