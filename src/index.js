@@ -86,7 +86,6 @@ function ck(value) {
   );
 }
 
-/* SERVER-SIDE HTML ESCAPE HELPER */
 function textSafe(v) {
   return String(v == null ? "" : v)
     .replace(/&/g, "&amp;")
@@ -143,9 +142,11 @@ function shell(body, title) {
     ".logo{width:55px;height:55px;object-fit:contain;border-radius:10px}" +
     ".brand{font-weight:900;font-size:21px;letter-spacing:1px}" +
     ".brand span{color:#e21d2e}" +
-    ".tag{font-size:10px;color:#aaa;margin-top:4px;letter-spacing:1.1px;animation:tag 2.5s infinite}" +
 
-    "@keyframes tag{0%,100%{opacity:.45}50%{opacity:1}}" +
+    /* ONLY THE RED SCROLLING LINE IS CHANGED */
+    ".tag-wrap{width:min(700px,65vw);overflow:hidden;white-space:nowrap;margin-top:4px}" +
+    ".tag{display:inline-block;font-size:10px;color:#e21d2e;letter-spacing:1.1px;white-space:nowrap;animation:tagscroll 12s linear infinite}" +
+    "@keyframes tagscroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}" +
 
     ".main{max-width:1250px;margin:auto;padding:28px 18px 60px}" +
 
@@ -232,6 +233,7 @@ function shell(body, title) {
     ".main{padding:20px 11px 45px}" +
     ".hero h1{font-size:25px}" +
     ".brand{font-size:17px}" +
+    ".tag-wrap{width:220px}" +
     ".tag{font-size:8px}" +
     ".two{grid-template-columns:1fr}" +
     ".content{padding:11px}" +
@@ -257,7 +259,7 @@ function shell(body, title) {
     '">' +
     '<div>' +
     '<div class="brand">ALANG <span>ORIGINAL PRODUCTS</span></div>' +
-    '<div class="tag">ALL ORIGINAL ALANG PRODUCTS WILL BE AVAILABLE HERE.</div>' +
+    '<div class="tag-wrap"><div class="tag">ALL ORIGINAL ALANG PRODUCTS WILL BE AVAILABLE HERE.</div></div>' +
     "</div>" +
     "</div>" +
     "</header>" +
@@ -901,7 +903,6 @@ async function adminPage(env, editId) {
     "var out=await res.json();" +
 
     "if(out.ok)location.href='/admin';" +
-
     "else alert(out.error||'Delete failed.');" +
 
     "}" +
