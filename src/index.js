@@ -449,6 +449,29 @@ justify-content:space-between;
 gap:10px
 }
 
+.gallery{
+display:grid;
+grid-template-columns:
+repeat(auto-fit,minmax(110px,1fr));
+gap:10px;
+margin-top:15px
+}
+
+.gallery img{
+width:100%;
+height:120px;
+object-fit:cover;
+border-radius:10px;
+border:1px solid #293039;
+cursor:pointer
+}
+
+.sharebox{
+display:grid;
+gap:10px;
+margin-top:15px
+}
+
 footer{
 text-align:center;
 color:#69737d;
@@ -481,6 +504,7 @@ grid-template-columns:1fr
 }
 
 }
+
 `;
 
 
@@ -616,6 +640,8 @@ async function publicPage(e){
             esc(p.price)+
             "</div>"+
 
+            "<div class='two'>"+
+
             "<button "+
             "class='btn' "+
             "onclick='showProduct("+
@@ -623,6 +649,16 @@ async function publicPage(e){
             ")'>"+
             "VIEW PRODUCT"+
             "</button>"+
+
+            "<button "+
+            "class='btn' "+
+            "onclick='shareProduct("+
+            Number(p.id)+
+            ")'>"+
+            "SHARE"+
+            "</button>"+
+
+            "</div>"+
 
           "</div>"+
 
@@ -825,6 +861,125 @@ const PRODUCTS=${productData};
 const WHATSAPP="${WHATSAPP_NUMBER}";
 
 
+function productLink(id){
+
+  return(
+    location.origin+
+    location.pathname+
+    "?product="+
+    id
+  );
+
+}
+
+
+async function copyProductLink(id){
+
+  const url=
+    productLink(id);
+
+  try{
+
+    if(
+      navigator.clipboard
+    ){
+
+      await navigator.clipboard.writeText(
+        url
+      );
+
+      alert(
+        "Product link copied successfully."
+      );
+
+      return;
+
+    }
+
+  }catch(err){}
+
+
+  prompt(
+    "Copy Product Link:",
+    url
+  );
+
+}
+
+
+async function shareProduct(id){
+
+  const p=
+    PRODUCTS.find(
+      function(x){
+
+        return(
+          Number(x.id)===
+          Number(id)
+        );
+
+      }
+    );
+
+
+  if(!p){
+    return;
+  }
+
+
+  const url=
+    productLink(id);
+
+
+  try{
+
+    if(
+      navigator.share
+    ){
+
+      await navigator.share({
+
+        title:
+          p.name,
+
+        text:
+          "ALANG ORIGINAL PRODUCTS - "+
+          p.name,
+
+        url:
+          url
+
+      });
+
+    }else{
+
+      await copyProductLink(
+        id
+      );
+
+    }
+
+  }catch(err){
+
+    if(
+      err &&
+      err.name==="AbortError"
+    ){
+
+      return;
+
+    }
+
+
+    await copyProductLink(
+      id
+    );
+
+  }
+
+}
+
+
 function showProduct(id){
 
   const p=
@@ -891,45 +1046,67 @@ function showProduct(id){
     };
 
 
-  mb.appendChild(close);
+  mb.appendChild(
+    close
+  );
 
+
+  /* ALL PRODUCT IMAGES */
 
   if(
     p.images &&
     p.images.length
   ){
 
-    const img=
+    const gallery=
       document.createElement(
-        "img"
+        "div"
       );
 
 
-    img.src=
-      p.images[0];
+    gallery.className=
+      "gallery";
 
 
-    img.alt=
-      p.name;
+    p.images.forEach(
+      function(src){
+
+        const img=
+          document.createElement(
+            "img"
+          );
 
 
-    img.style.width=
-      "100%";
+        img.src=
+          src;
 
 
-    img.style.maxHeight=
-      "430px";
+        img.alt=
+          p.name;
 
 
-    img.style.objectFit=
-      "contain";
+        img.onclick=
+          function(){
+
+            window.open(
+              src,
+              "_blank"
+            );
+
+          };
 
 
-    img.style.marginTop=
-      "15px";
+        gallery.appendChild(
+          img
+        );
+
+      }
+    );
 
 
-    mb.appendChild(img);
+    mb.appendChild(
+      gallery
+    );
 
   }
 
@@ -944,7 +1121,9 @@ function showProduct(id){
     p.name;
 
 
-  mb.appendChild(title);
+  mb.appendChild(
+    title
+  );
 
 
   const category=
@@ -961,7 +1140,9 @@ function showProduct(id){
     p.category;
 
 
-  mb.appendChild(category);
+  mb.appendChild(
+    category
+  );
 
 
   const description=
@@ -974,7 +1155,9 @@ function showProduct(id){
     p.description;
 
 
-  mb.appendChild(description);
+  mb.appendChild(
+    description
+  );
 
 
   const price=
@@ -991,8 +1174,87 @@ function showProduct(id){
     p.price;
 
 
-  mb.appendChild(price);
+  mb.appendChild(
+    price
+  );
 
+
+  /* SHARE + COPY */
+
+  const sharebox=
+    document.createElement(
+      "div"
+    );
+
+
+  sharebox.className=
+    "sharebox";
+
+
+  const share=
+    document.createElement(
+      "button"
+    );
+
+
+  share.className=
+    "btn";
+
+
+  share.textContent=
+    "SHARE PRODUCT";
+
+
+  share.onclick=
+    function(){
+
+      shareProduct(
+        p.id
+      );
+
+    };
+
+
+  sharebox.appendChild(
+    share
+  );
+
+
+  const copy=
+    document.createElement(
+      "button"
+    );
+
+
+  copy.className=
+    "btn";
+
+
+  copy.textContent=
+    "COPY PRODUCT LINK";
+
+
+  copy.onclick=
+    function(){
+
+      copyProductLink(
+        p.id
+      );
+
+    };
+
+
+  sharebox.appendChild(
+    copy
+  );
+
+
+  mb.appendChild(
+    sharebox
+  );
+
+
+  /* WHATSAPP */
 
   if(WHATSAPP){
 
@@ -1015,13 +1277,12 @@ function showProduct(id){
       WHATSAPP+
       "?text="+
       encodeURIComponent(
+
         "Hello, I am interested in this product: "+
         p.name+
         " | Product Link: "+
-        location.origin+
-        location.pathname+
-        "?product="+
-        p.id
+        productLink(p.id)
+
       );
 
 
@@ -1029,7 +1290,13 @@ function showProduct(id){
       "WHATSAPP INQUIRY";
 
 
-    mb.appendChild(wa);
+    wa.style.marginTop=
+      "10px";
+
+
+    mb.appendChild(
+      wa
+    );
 
   }
 
@@ -1042,7 +1309,8 @@ function showProduct(id){
   history.replaceState(
     null,
     "",
-    "?product="+p.id
+    "?product="+
+    p.id
   );
 
 }
@@ -1053,7 +1321,9 @@ function renderProducts(){
   const search=
     (
       document
-        .getElementById("q")
+        .getElementById(
+          "q"
+        )
         .value||""
     )
     .toLowerCase()
@@ -1062,7 +1332,9 @@ function renderProducts(){
 
   const category=
     document
-      .getElementById("c")
+      .getElementById(
+        "c"
+      )
       .value;
 
 
@@ -1084,12 +1356,15 @@ function renderProducts(){
         return(
 
           (!search ||
-           text.includes(search))
+           text.includes(
+             search
+           ))
 
           &&
 
           (!category ||
-           p.category===category)
+           p.category===
+           category)
 
         );
 
@@ -1177,7 +1452,9 @@ function renderProducts(){
           p.name;
 
 
-        pic.appendChild(img);
+        pic.appendChild(
+          img
+        );
 
       }else{
 
@@ -1297,25 +1574,35 @@ function renderProducts(){
       );
 
 
-      const button=
+      const buttons=
+        document.createElement(
+          "div"
+        );
+
+
+      buttons.className=
+        "two";
+
+
+      const view=
         document.createElement(
           "button"
         );
 
 
-      button.type=
+      view.type=
         "button";
 
 
-      button.className=
+      view.className=
         "btn";
 
 
-      button.textContent=
+      view.textContent=
         "VIEW PRODUCT";
 
 
-      button.onclick=
+      view.onclick=
         function(){
 
           showProduct(
@@ -1325,8 +1612,46 @@ function renderProducts(){
         };
 
 
+      buttons.appendChild(
+        view
+      );
+
+
+      const shareBtn=
+        document.createElement(
+          "button"
+        );
+
+
+      shareBtn.type=
+        "button";
+
+
+      shareBtn.className=
+        "btn";
+
+
+      shareBtn.textContent=
+        "SHARE";
+
+
+      shareBtn.onclick=
+        function(){
+
+          shareProduct(
+            p.id
+          );
+
+        };
+
+
+      buttons.appendChild(
+        shareBtn
+      );
+
+
       content.appendChild(
-        button
+        buttons
       );
 
 
@@ -1346,7 +1671,9 @@ function renderProducts(){
 
 
 document
-  .getElementById("q")
+  .getElementById(
+    "q"
+  )
   .addEventListener(
     "input",
     renderProducts
@@ -1354,7 +1681,9 @@ document
 
 
 document
-  .getElementById("c")
+  .getElementById(
+    "c"
+  )
   .addEventListener(
     "change",
     renderProducts
@@ -1364,7 +1693,9 @@ document
 const productId=
   new URLSearchParams(
     location.search
-  ).get("product");
+  ).get(
+    "product"
+  );
 
 
 if(productId){
