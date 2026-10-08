@@ -133,7 +133,6 @@ function shell(body, title) {
     "<style>" +
 
     "*{box-sizing:border-box}" +
-
     "html{scroll-behavior:smooth}" +
 
     "body{" +
@@ -165,9 +164,10 @@ function shell(body, title) {
     "text-align:center;" +
     "}" +
 
+    /* LOGO MADE LARGER */
     ".logo{" +
-    "width:135px;" +
-    "height:135px;" +
+    "width:165px;" +
+    "height:165px;" +
     "object-fit:contain;" +
     "display:block;" +
     "margin:0 auto 5px;" +
@@ -185,29 +185,41 @@ function shell(body, title) {
     "color:#e21d2e;" +
     "}" +
 
+    /*
+      RED TEXT:
+      NO SCROLLING.
+      STATIC CENTER POSITION.
+      SLOW ZOOM IN / ZOOM OUT.
+    */
+
     ".tag-wrap{" +
     "width:100%;" +
     "overflow:hidden;" +
     "white-space:nowrap;" +
     "margin-top:12px;" +
-    "padding:7px 0;" +
+    "padding:8px 0;" +
     "border-top:1px solid rgba(226,29,46,.20);" +
     "border-bottom:1px solid rgba(226,29,46,.20);" +
+    "display:flex;" +
+    "align-items:center;" +
+    "justify-content:center;" +
     "}" +
 
     ".tag{" +
-    "display:inline-block;" +
+    "display:block;" +
     "font-size:13px;" +
     "font-weight:900;" +
     "color:#e21d2e;" +
     "letter-spacing:1.4px;" +
     "white-space:nowrap;" +
-    "animation:tagscroll 12s linear infinite;" +
+    "text-align:center;" +
+    "transform-origin:center center;" +
+    "animation:tagzoom 4.5s ease-in-out infinite;" +
     "}" +
 
-    "@keyframes tagscroll{" +
-    "0%{transform:translateX(100vw)}" +
-    "100%{transform:translateX(-100%)}" +
+    "@keyframes tagzoom{" +
+    "0%,100%{transform:scale(1);}" +
+    "50%{transform:scale(1.18);}" +
     "}" +
 
     /* ================= MAIN ================= */
@@ -645,9 +657,10 @@ function shell(body, title) {
 
     ".hero h1{font-size:25px}" +
 
+    /* MOBILE LOGO ALSO LARGER */
     ".logo{" +
-    "width:120px;" +
-    "height:120px;" +
+    "width:145px;" +
+    "height:145px;" +
     "}" +
 
     ".brand{" +
@@ -703,8 +716,8 @@ function shell(body, title) {
     "}" +
 
     ".logo{" +
-    "width:110px;" +
-    "height:110px;" +
+    "width:135px;" +
+    "height:135px;" +
     "}" +
 
     ".brand{" +
@@ -1419,7 +1432,6 @@ async function adminPage(env, editId) {
     "if(!data.name.trim()){" +
 
     "alert('Product name is required.');" +
-
     "return;" +
 
     "}" +
@@ -1459,13 +1471,11 @@ async function adminPage(env, editId) {
     "function renderList(){" +
 
     "var el=document.getElementById('productList');" +
-
     "el.innerHTML='';" +
 
     "if(!PRODUCTS.length){" +
 
     "el.innerHTML='<div style=\"color:#888\">No products yet.</div>';" +
-
     "return;" +
 
     "}" +
@@ -1522,9 +1532,7 @@ export default {
     try {
 
       const url = new URL(request.url);
-
       const path = url.pathname;
-
       const method = request.method;
 
       if (path === "/" && method === "GET") {
